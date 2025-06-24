@@ -1,47 +1,26 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>D-ID Live Agent Example</title>
-  <script src="https://cdn.d-id.com/sdk/2.0.6/agents/index.js"></script>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      padding: 20px;
-      background-color: #f4f4f4;
-    }
+<html>
+  <head>
+    <title>D-ID Live Agent</title>
+    <script src="https://cdn.d-id.com/sdk/2.0.6/agents/index.js"></script>
+  </head>
+  <body>
+    <h1>Live Agent</h1>
+    <div id="agent-container" style="width:400px;height:500px;"></div>
 
-    #agent-container {
-      width: 400px;
-      height: 500px;
-      margin: auto;
-      border: 1px solid #ccc;
-      background-color: #fff;
-      padding: 20px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
-  </style>
-</head>
-<body>
+    <script>
+      async function init() {
+        const agent = await DID.createDIDAgent({
+          apiKey: 'ZXZhbmRlci5mb3h4QGRzaXRpcC5jb20:Lrn4LeZTHLAWCeQXAdfQ9', // replace this
+          agentId: 'agt_Jd4BnTW4', // replace this
+          container: document.getElementById('agent-container'),
+          enableSpeech: true
+        });
 
-  <h2 style="text-align: center;">D-ID Live Agent</h2>
-  <div id="agent-container"></div>
+        agent.start();
+      }
 
-  <script>
-    async function startAgent() {
-      const agent = await DID.createDIDAgent({
-        apiKey: 'ZXZhbmRlci5mb3h4QGRzaXRpcC5jb20:Lrn4LeZTHLAWCeQXAdfQ9', // Replace with your API key
-        agentId: 'agt_Jd4BnTW4',   // Replace with your D-ID Agent ID
-        container: document.getElementById('agent-container'),
-        enableSpeech: true
-      });
-
-      agent.start();
-    }
-
-    startAgent();
-  </script>
-
-</body>
+      init();
+    </script>
+  </body>
 </html>
