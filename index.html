@@ -2,126 +2,21 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>HeyGen Interactive Avatar with Transcript Saver</title>
+  <title>HeyGen Interactive Avatar</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      padding: 20px;
-    }
-    #transcript {
-      width: 100%;
-      height: 200px;
-      margin-top: 20px;
-    }
-    button {
-      margin-top: 10px;
-      padding: 8px 16px;
-      font-size: 16px;
-      cursor: pointer;
-    }
+    video { width: 480px; height: 360px; border: 2px solid #333; }
+    input, button { margin-top: 10px; display: block; width: 100%; }
+    #transcript { margin-top: 10px; font-family: monospace; }
   </style>
 </head>
 <body>
-
   <h2>HeyGen Interactive Avatar</h2>
-  <p>Talk to the avatar and the transcript will appear below.</p>
+  <video id="avatar-video" autoplay playsinline></video>
+  <input id="text-input" placeholder="Type your question here" />
+  <button onclick="sendMessage()">Send</button>
+  <div id="transcript"></div>
 
-  <textarea id="transcript" placeholder="Transcript will appear here..." readonly></textarea><br>
-  <button onclick="downloadTranscript()">Download Transcript</button>
-
-  <!-- Your HeyGen Embed Script -->
-  <script>
-  !function(window){
-    const host="https://labs.heygen.com",
-    url=host+"/guest/streaming-embed?share=eyJxdWFsaXR5IjoiaGlnaCIsImF2YXRhck5hbWUiOiJQZWRyb19CbGFja19TdWl0X3B1YmxpYyIs%0D%0AInByZXZpZXdJbWciOiJodHRwczovL2ZpbGVzMi5oZXlnZW4uYWkvYXZhdGFyL3YzLzEyNzNkZGQ4%0D%0AODFlYjQxMTRhNzkyZTU2YzhlYmU4OTk4XzU1NDEwL3ByZXZpZXdfdGFsa18xLndlYnAiLCJuZWVk%0D%0AUmVtb3ZlQmFja2dyb3VuZCI6dHJ1ZSwia25vd2xlZGdlQmFzZUlkIjoiNWVlYzhhZTRiMDVmNGI5%0D%0ANjk2YjI1Njg5MDY1MDM4OTYiLCJ1c2VybmFtZSI6ImZlYzQ3ZmQzOTZmMDRkZjJhOTU3MmI0NWMw%0D%0ANWIzYmNhIn0%3D&inIFrame=1",
-    clientWidth=document.body.clientWidth,
-    wrapDiv=document.createElement("div");
-
-    wrapDiv.id="heygen-streaming-embed";
-    const container=document.createElement("div");
-    container.id="heygen-streaming-container";
-    const stylesheet=document.createElement("style");
-
-    stylesheet.innerHTML=`\n  #heygen-streaming-embed {
-      z-index: 9999;
-      position: fixed;
-      left: 40px;
-      bottom: 40px;
-      width: 200px;
-      height: 200px;
-      border-radius: 50%;
-      border: 2px solid #fff;
-      box-shadow: 0px 8px 24px 0px rgba(0, 0, 0, 0.12);
-      transition: all linear 0.1s;
-      overflow: hidden;
-      opacity: 0;
-      visibility: hidden;
-    }
-    #heygen-streaming-embed.show {
-      opacity: 1;
-      visibility: visible;
-    }
-    #heygen-streaming-embed.expand {
-      ${clientWidth<540?"height: 266px; width: 96%; left: 50%; transform: translateX(-50%);":"height: 366px; width: calc(366px * 16 / 9);"}
-      border: 0;
-      border-radius: 8px;
-    }
-    #heygen-streaming-container {
-      width: 100%;
-      height: 100%;
-    }
-    #heygen-streaming-container iframe {
-      width: 100%;
-      height: 100%;
-      border: 0;
-    }`;
-
-    const iframe=document.createElement("iframe");
-    iframe.allowFullscreen=!1;
-    iframe.title="Streaming Embed";
-    iframe.role="dialog";
-    iframe.allow="microphone";
-    iframe.src=url;
-
-    let visible=!1,initial=!1;
-
-    window.addEventListener("message",(e=>{
-      if(e.origin===host && e.data && e.data.type==="streaming-embed"){
-        if(e.data.action==="init"){
-          initial=!0;
-          wrapDiv.classList.toggle("show",initial)
-        } else if(e.data.action==="show"){
-          visible=!0;
-          wrapDiv.classList.toggle("expand",visible)
-        } else if(e.data.action==="hide"){
-          visible=!1;
-          wrapDiv.classList.toggle("expand",visible)
-        } else if (e.data.action === "transcript") {
-          // Append transcript text
-          const transcriptBox = document.getElementById("transcript");
-          transcriptBox.value += e.data.payload.text + "\n";
-        }
-      }
-    }));
-
-    container.appendChild(iframe);
-    wrapDiv.appendChild(stylesheet);
-    wrapDiv.appendChild(container);
-    document.body.appendChild(wrapDiv);
-  }(globalThis);
-  </script>
-
-  <!-- Save transcript to .txt -->
-  <script>
-    function downloadTranscript() {
-      const transcript = document.getElementById("transcript").value;
-      const blob = new Blob([transcript], { type: "text/plain" });
-      const link = document.createElement("a");
-      link.href = URL.createObjectURL(blob);
-      link.download = "heygen_transcript.txt";
-      link.click();
-    }
-  </script>
-
+  <script src="https://cdn.livekit.io/js/livekit-client.min.js"></script>
+  <script type="module" src="main.js"></script>
 </body>
 </html>
