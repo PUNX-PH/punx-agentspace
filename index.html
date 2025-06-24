@@ -9,7 +9,7 @@
   </head>
   <body class="bg-gray-100 p-5 font-sans">
     <div class="max-w-3xl mx-auto bg-white p-5 rounded-lg shadow-md">
-      <!-- Top Controls -->
+      <!-- Controls -->
       <div class="flex flex-wrap gap-2.5 mb-5">
         <input
           id="avatarID"
@@ -38,7 +38,6 @@
         </button>
       </div>
 
-      <!-- Input + Talk -->
       <div class="flex flex-wrap gap-2.5 mb-5">
         <input
           id="taskInput"
@@ -63,28 +62,30 @@
           class="px-4 py-2 bg-purple-500 text-white rounded-md hover:bg-purple-600 transition-colors disabled:opacity-50"
           disabled
         >
-          Download Transcript
+          Show Transcript JSON
         </button>
       </div>
 
-      <!-- Video Stream + Status -->
+      <!-- Video -->
       <video
         id="mediaElement"
         class="w-full max-h-[400px] border rounded-lg my-5"
         autoplay
       ></video>
+
+      <!-- Status Log -->
       <div
         id="status"
-        class="p-2.5 bg-gray-50 border border-gray-300 rounded-md h-[100px] overflow-y-auto font-mono text-sm"
+        class="p-2.5 bg-gray-50 border border-gray-300 rounded-md h-[200px] overflow-y-auto font-mono text-sm"
       ></div>
     </div>
 
     <!-- Script -->
     <script>
       const API_CONFIG = {
-        apiKey: "ZmVjNDdmZDM5NmYwNGRmMmE5NTcyYjQ1YzA1YjNiY2EtMTc1MDc2NTYwMg==", // still needed for /streaming.start etc.
+        apiKey: "YOUR_API_KEY", // Replace with your HeyGen API key
         serverUrl: "https://api.heygen.com",
-        proxyTranscriptUrl: "https://punx-agentspace.vercel.app/api/transcript", // change this
+        proxyTranscriptUrl: "https://punx-agentspace.vercel.app/api/transcript", // Update if needed
       };
 
       let sessionInfo = null;
@@ -246,7 +247,7 @@
         room?.disconnect();
 
         mediaElement.srcObject = null;
-        updateStatus("Session closed. Transcript is ready.");
+        updateStatus("Session closed. Transcript ready.");
         downloadBtn.disabled = false;
       }
 
@@ -256,28 +257,35 @@
           return;
         }
 
-        const res = await fetch(`${API_CONFIG.proxyTranscriptUrl}?session_id=${sessionInfo.session_id}`);
-        const data = await res.json();
+        try {
+          const response = await fetch(
+            `${API_CONFIG.proxyTranscriptUrl}?session_id=${sessionInfo.session_id}`
+          );
 
-        if (!data || !data.data || data.data.length === 0) {
-          updateStatus("Transcript not available.");
-          return;
+          if (!response.ok) {
+            const error = await response.text();
+            updateStatus(`Transcript fetch failed: ${error}`);
+            return;
+          }
+
+          const result = await response.json();
+
+          if (!result?.data || result.data.length === 0) {
+            updateStatus("Transcript is empty or unavailable.");
+            return;
+          }
+
+          console.log("Transcript JSON:", result);
+          updateStatus("Transcript JSON logged to console.");
+
+          result.data.forEach((entry) => {
+            const timestamp = entry.timestamp || "no-time";
+            updateStatus(`[${timestamp}] ${entry.speaker}: ${entry.text}`);
+          });
+        } catch (err) {
+          console.error("Error fetching transcript:", err);
+          updateStatus("Error fetching transcript. See console for details.");
         }
-
-        const text = data.data
-          .map(
-            (entry) => `[${entry.timestamp || "no-time"}] ${entry.speaker}: ${entry.text}`
-          )
-          .join("\n");
-
-        const blob = new Blob([text], { type: "text/plain" });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = `transcript_${sessionInfo.session_id}.txt`;
-        a.click();
-        URL.revokeObjectURL(url);
-        updateStatus("Transcript downloaded.");
       }
 
       document.querySelector("#startBtn").addEventListener("click", async () => {
