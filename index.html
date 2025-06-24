@@ -2,57 +2,105 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>HeyGen Live Agent with Chat Save</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>HeyGen Interactive Avatar</title>
   <style>
-    html, body {
-      margin: 0; padding: 0; height: 100%;
+    body {
       font-family: Arial, sans-serif;
+      padding: 20px;
+      background: #f9f9f9;
     }
-    iframe {
+    #avatar-container {
       width: 100%;
-      height: 90vh;
-      border: none;
+      height: 500px;
+      margin-bottom: 20px;
     }
-    button {
-      width: 100%;
-      height: 10vh;
-      font-size: 20px;
-      background-color: #4CAF50;
-      color: white;
-      border: none;
-      cursor: pointer;
+    #chat-box {
+      max-height: 200px;
+      overflow-y: auto;
+      border: 1px solid #ccc;
+      padding: 10px;
+      margin-bottom: 10px;
+      background: #fff;
     }
-    button:hover {
-      background-color: #45a049;
+    .msg {
+      margin-bottom: 5px;
     }
   </style>
 </head>
 <body>
 
-  <iframe id="agentFrame"
-    src="https://live.heygen.com/agent/Katya_ProfessionalLook2_public?apiKey=ZmVjNDdmZDM5NmYwNGRmMmE5NTcyYjQ1YzA1YjNiY2EtMTc1MDc1MTE3Nw=="
-    allow="microphone; camera; autoplay"
-  ></iframe>
+  <h1>HeyGen Interactive Avatar</h1>
 
-  <button onclick="saveChat()">Save Chat Session</button>
+  <div id="avatar-container">
+    <!-- Replace src with your HeyGen iframe embed URL -->
+    <iframe 
+      src="https://embed.heygen.com/interactives/YOUR_AGENT_ID"
+      width="100%" height="100%" frameborder="0" allow="microphone; camera">
+    </iframe>
+  </div>
+
+  <div id="chat-box"></div>
+
+  <input type="text" id="user-input" placeholder="Type your message here..." style="width: 80%;" />
+  <button onclick="sendText()">Send</button>
+  <button onclick="startVoiceInput()">🎤 Speak</button>
 
   <script>
-    async function saveChat() {
-      const sessionId = 'example-session-id'; // Replace this with real session info
-      const res = await fetch(`https://api.heygen.com/v1/conversations/${sessionId}`, {
+    const chatBox = document.getElementById('chat-box');
+    const input = document.getElementById('user-input');
+
+    function appendMessage(role, text) {
+      const msg = document.createElement('div');
+      msg.className = 'msg';
+      msg.innerHTML = `<strong>${role}:</strong> ${text}`;
+      chatBox.appendChild(msg);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    async function sendText() {
+      const message = input.value.trim();
+      if (!message) return;
+      appendMessage("You", message);
+
+      // Send the message to HeyGen API (example, backend proxy is better)
+      const res = await fetch("https://api.heygen.com/v1/agent/message", {
+        method: "POST",
         headers: {
-          'Authorization': 'Bearer ZmVjNDdmZDM5NmYwNGRmMmE5NTcyYjQ1YzA1YjNiY2EtMTc1MDc1MTE3Nw=='
-        }
+          "Content-Type": "application/json",
+          "Authorization": "Bearer ZmVjNDdmZDM5NmYwNGRmMmE5NTcyYjQ1YzA1YjNiY2EtMTc1MDc1MTE3Nw=="
+        },
+        body: JSON.stringify({
+          agent_id: "Thaddeus_Black_Shirt_public",
+          user_input: message,
+          session_id: "demo-session-" + Date.now()
+        })
       });
-      const chatData = await res.json();
 
-      await fetch('http://localhost:3000/save-chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(chatData)
-      });
+      const data = await res.json();
+      const reply = data?.reply || "No response.";
+      appendMessage("Avatar", reply);
 
-      alert('Chat session saved!');
+      input.value = "";
+    }
+
+    function startVoiceInput() {
+      const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+      recognition.lang = 'en-US';
+      recognition.interimResults = false;
+      recognition.maxAlternatives = 1;
+
+      recognition.start();
+
+      recognition.onresult = function(event) {
+        const speechResult = event.results[0][0].transcript;
+        input.value = speechResult;
+        sendText();
+      };
+
+      recognition.onerror = function(event) {
+        alert("Speech recognition error: " + event.error);
+      };
     }
   </script>
 
