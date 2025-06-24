@@ -1,110 +1,127 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>HeyGen Interactive Avatar</title>
+  <meta charset="UTF-8">
+  <title>HeyGen Interactive Avatar with Transcript Saver</title>
   <style>
     body {
       font-family: Arial, sans-serif;
       padding: 20px;
-      background: #f9f9f9;
     }
-    #avatar-container {
+    #transcript {
       width: 100%;
-      height: 500px;
-      margin-bottom: 20px;
+      height: 200px;
+      margin-top: 20px;
     }
-    #chat-box {
-      max-height: 200px;
-      overflow-y: auto;
-      border: 1px solid #ccc;
-      padding: 10px;
-      margin-bottom: 10px;
-      background: #fff;
-    }
-    .msg {
-      margin-bottom: 5px;
+    button {
+      margin-top: 10px;
+      padding: 8px 16px;
+      font-size: 16px;
+      cursor: pointer;
     }
   </style>
 </head>
 <body>
 
-  <h1>HeyGen Interactive Avatar</h1>
+  <h2>HeyGen Interactive Avatar</h2>
+  <p>Talk to the avatar and the transcript will appear below.</p>
 
-  <div id="avatar-container">
-    <!-- Replace src with your HeyGen iframe embed URL -->
-    <iframe 
-      src="https://embed.heygen.com/interactives/YOUR_AGENT_ID"
-      width="100%" height="100%" frameborder="0" allow="microphone; camera">
-    </iframe>
-  </div>
+  <textarea id="transcript" placeholder="Transcript will appear here..." readonly></textarea><br>
+  <button onclick="downloadTranscript()">Download Transcript</button>
 
-  <div id="chat-box"></div>
-
-  <input type="text" id="user-input" placeholder="Type your message here..." style="width: 80%;" />
-  <button onclick="sendText()">Send</button>
-  <button onclick="startVoiceInput()">🎤 Speak</button>
-
+  <!-- Your HeyGen Embed Script -->
   <script>
-    const chatBox = document.getElementById('chat-box');
-    const input = document.getElementById('user-input');
+  !function(window){
+    const host="https://labs.heygen.com",
+    url=host+"/guest/streaming-embed?share=eyJxdWFsaXR5IjoiaGlnaCIsImF2YXRhck5hbWUiOiJQZWRyb19CbGFja19TdWl0X3B1YmxpYyIs%0D%0AInByZXZpZXdJbWciOiJodHRwczovL2ZpbGVzMi5oZXlnZW4uYWkvYXZhdGFyL3YzLzEyNzNkZGQ4%0D%0AODFlYjQxMTRhNzkyZTU2YzhlYmU4OTk4XzU1NDEwL3ByZXZpZXdfdGFsa18xLndlYnAiLCJuZWVk%0D%0AUmVtb3ZlQmFja2dyb3VuZCI6dHJ1ZSwia25vd2xlZGdlQmFzZUlkIjoiNWVlYzhhZTRiMDVmNGI5%0D%0ANjk2YjI1Njg5MDY1MDM4OTYiLCJ1c2VybmFtZSI6ImZlYzQ3ZmQzOTZmMDRkZjJhOTU3MmI0NWMw%0D%0ANWIzYmNhIn0%3D&inIFrame=1",
+    clientWidth=document.body.clientWidth,
+    wrapDiv=document.createElement("div");
 
-    function appendMessage(role, text) {
-      const msg = document.createElement('div');
-      msg.className = 'msg';
-      msg.innerHTML = `<strong>${role}:</strong> ${text}`;
-      chatBox.appendChild(msg);
-      chatBox.scrollTop = chatBox.scrollHeight;
+    wrapDiv.id="heygen-streaming-embed";
+    const container=document.createElement("div");
+    container.id="heygen-streaming-container";
+    const stylesheet=document.createElement("style");
+
+    stylesheet.innerHTML=`\n  #heygen-streaming-embed {
+      z-index: 9999;
+      position: fixed;
+      left: 40px;
+      bottom: 40px;
+      width: 200px;
+      height: 200px;
+      border-radius: 50%;
+      border: 2px solid #fff;
+      box-shadow: 0px 8px 24px 0px rgba(0, 0, 0, 0.12);
+      transition: all linear 0.1s;
+      overflow: hidden;
+      opacity: 0;
+      visibility: hidden;
     }
-
-    async function sendText() {
-      const message = input.value.trim();
-      if (!message) return;
-      appendMessage("You", message);
-
-      // Send the message to HeyGen API (example, backend proxy is better)
-      const res = await fetch("https://api.heygen.com/v1/agent/message", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": "Bearer ZmVjNDdmZDM5NmYwNGRmMmE5NTcyYjQ1YzA1YjNiY2EtMTc1MDc1MTE3Nw=="
-        },
-        body: JSON.stringify({
-          agent_id: "Thaddeus_Black_Shirt_public",
-          user_input: message,
-          session_id: "demo-session-" + Date.now()
-        })
-      });
-
-      const data = await res.json();
-      const reply = data?.reply || "No response.";
-      appendMessage("Avatar", reply);
-
-      input.value = "";
+    #heygen-streaming-embed.show {
+      opacity: 1;
+      visibility: visible;
     }
+    #heygen-streaming-embed.expand {
+      ${clientWidth<540?"height: 266px; width: 96%; left: 50%; transform: translateX(-50%);":"height: 366px; width: calc(366px * 16 / 9);"}
+      border: 0;
+      border-radius: 8px;
+    }
+    #heygen-streaming-container {
+      width: 100%;
+      height: 100%;
+    }
+    #heygen-streaming-container iframe {
+      width: 100%;
+      height: 100%;
+      border: 0;
+    }`;
 
-    function startVoiceInput() {
-      const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-      recognition.lang = 'en-US';
-      recognition.interimResults = false;
-      recognition.maxAlternatives = 1;
+    const iframe=document.createElement("iframe");
+    iframe.allowFullscreen=!1;
+    iframe.title="Streaming Embed";
+    iframe.role="dialog";
+    iframe.allow="microphone";
+    iframe.src=url;
 
-      recognition.start();
+    let visible=!1,initial=!1;
 
-      recognition.onresult = function(event) {
-        const speechResult = event.results[0][0].transcript;
-        input.value = speechResult;
-        sendText();
-      };
+    window.addEventListener("message",(e=>{
+      if(e.origin===host && e.data && e.data.type==="streaming-embed"){
+        if(e.data.action==="init"){
+          initial=!0;
+          wrapDiv.classList.toggle("show",initial)
+        } else if(e.data.action==="show"){
+          visible=!0;
+          wrapDiv.classList.toggle("expand",visible)
+        } else if(e.data.action==="hide"){
+          visible=!1;
+          wrapDiv.classList.toggle("expand",visible)
+        } else if (e.data.action === "transcript") {
+          // Append transcript text
+          const transcriptBox = document.getElementById("transcript");
+          transcriptBox.value += e.data.payload.text + "\n";
+        }
+      }
+    }));
 
-      recognition.onerror = function(event) {
-        alert("Speech recognition error: " + event.error);
-      };
+    container.appendChild(iframe);
+    wrapDiv.appendChild(stylesheet);
+    wrapDiv.appendChild(container);
+    document.body.appendChild(wrapDiv);
+  }(globalThis);
+  </script>
+
+  <!-- Save transcript to .txt -->
+  <script>
+    function downloadTranscript() {
+      const transcript = document.getElementById("transcript").value;
+      const blob = new Blob([transcript], { type: "text/plain" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = "heygen_transcript.txt";
+      link.click();
     }
   </script>
 
 </body>
 </html>
-
-
