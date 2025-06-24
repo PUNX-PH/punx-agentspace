@@ -64,6 +64,9 @@
         updateStatus("Session token obtained");
       }
 
+      let avatarSpeaking = false;
+      let avatarBuffer = [];
+
       async function connectWebSocket(sessionId) {
         const params = new URLSearchParams({
           session_id: sessionId,
@@ -78,22 +81,40 @@
 
         webSocket.addEventListener("message", (event) => {
           const eventData = JSON.parse(event.data);
-          console.log("Raw WebSocket event:", eventData);
+          console.log("WebSocket Event:", eventData);
 
-          if (eventData.type === "USER_TALKING_MESSAGE") {
-            transcriptLog.push({
-              speaker: "user",
-              text: eventData.text,
-              timestamp: new Date().toISOString(),
-            });
-          }
+          switch (eventData.type) {
+            case "USER_TALKING_MESSAGE":
+              transcriptLog.push({
+                speaker: "user",
+                text: eventData.text,
+                timestamp: new Date().toISOString(),
+              });
+              break;
 
-          if (eventData.type === "AVATAR_TALKING_MESSAGE") {
-            transcriptLog.push({
-              speaker: "avatar",
-              text: eventData.text,
-              timestamp: new Date().toISOString(),
-            });
+            case "avatar_start_talking":
+              avatarSpeaking = true;
+              avatarBuffer = [];
+              break;
+
+            case "avatar_talking_message":
+              if (avatarSpeaking) {
+                avatarBuffer.push(eventData.message);
+              }
+              break;
+
+            case "avatar_end_message":
+              if (avatarSpeaking && avatarBuffer.length > 0) {
+                const fullMessage = avatarBuffer.join(" ").replace(/\s+/g, " ").trim();
+                transcriptLog.push({
+                  speaker: "avatar",
+                  text: fullMessage,
+                  timestamp: new Date().toISOString(),
+                });
+                avatarBuffer = [];
+                avatarSpeaking = false;
+              }
+              break;
           }
         });
       }
@@ -213,7 +234,6 @@
         room = null;
         mediaStream = null;
         sessionToken = null;
-        transcriptLog = [];
 
         document.querySelector("#startBtn").disabled = false;
         updateStatus("Session closed");
@@ -242,9 +262,15 @@
       });
 
       document.querySelector("#closeBtn").addEventListener("click", closeSession);
+
       document.querySelector("#talkBtn").addEventListener("click", () => {
         const text = taskInput.value.trim();
         if (text) {
+          transcriptLog.push({
+            speaker: "user",
+            text,
+            timestamp: new Date().toISOString(),
+          });
           sendText(text, "talk");
           taskInput.value = "";
         }
