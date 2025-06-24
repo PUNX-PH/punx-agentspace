@@ -82,7 +82,7 @@
     <!-- Script -->
     <script>
       const API_CONFIG = {
-        apiKey: "ZmVjNDdmZDM5NmYwNGRmMmE5NTcyYjQ1YzA1YjNiY2EtMTc1MDc2NTYwMg==", 
+        apiKey: "ZmVjNDdmZDM5NmYwNGRmMmE5NTcyYjQ1YzA1YjNiY2EtMTc1MDc2NTYwMg==",
         serverUrl: "https://api.heygen.com"
       };
 
@@ -131,18 +131,29 @@
         webSocket = new WebSocket(wsUrl);
 
         webSocket.addEventListener("message", (event) => {
-          const eventData = JSON.parse(event.data);
+          try {
+            const eventData = JSON.parse(event.data);
+            console.log("WebSocket event:", eventData);
 
-          if (eventData.type === "response" && eventData.text) {
-            transcriptLog.push({
-              timestamp: new Date().toISOString(),
-              speaker: "Avatar",
-              text: eventData.text,
-            });
-            updateStatus(`Avatar: ${eventData.text}`);
+            // Capture AI text responses from different types
+            if (
+              (eventData.type === "task_result" ||
+               eventData.type === "event" ||
+               eventData.type === "response") &&
+              eventData.text
+            ) {
+              transcriptLog.push({
+                timestamp: new Date().toISOString(),
+                speaker: "Avatar",
+                text: eventData.text,
+                type: eventData.type
+              });
+
+              updateStatus(`Avatar: ${eventData.text}`);
+            }
+          } catch (err) {
+            console.error("WebSocket message parse error:", err);
           }
-
-          console.log("WebSocket event:", eventData);
         });
       }
 
@@ -264,9 +275,9 @@
 
         webSocket?.close();
         room?.disconnect();
-
         mediaElement.srcObject = null;
-        updateStatus("Session closed. Transcript is ready for saving.");
+
+        updateStatus("Session closed. Transcript is ready.");
       }
 
       function saveTranscriptAsJson() {
