@@ -1,38 +1,32 @@
-async function downloadTranscript() {
-    if (!sessionInfo) {
-      updateStatus("Session ID not found.");
-      return;
+export default async function handler(req, res) {
+    const { session_id } = req.query;
+  
+    if (!session_id) {
+      return res.status(400).json({ error: "Missing session_id in query" });
+    }
+  
+    if (!process.env.HEYGEN_API_KEY) {
+      return res.status(500).json({ error: "HEYGEN_API_KEY is not set" });
     }
   
     try {
-      const response = await fetch(
-        `${API_CONFIG.proxyTranscriptUrl}?session_id=${sessionInfo.session_id}`
-      );
+      const response = await fetch(`https://api.heygen.com/v1/streaming.transcript?session_id=${session_id}`, {
+        headers: {
+          Authorization: `Bearer ${process.env.HEYGEN_API_KEY}`,
+        },
+      });
   
       if (!response.ok) {
-        const error = await response.text();
-        updateStatus(`Transcript fetch failed: ${error}`);
-        return;
+        const errorText = await response.text();
+        return res.status(response.status).json({ error: errorText });
       }
   
-      const result = await response.json();
-  
-      if (!result?.data || result.data.length === 0) {
-        updateStatus("Transcript is empty or unavailable.");
-        return;
-      }
-  
-      // Log JSON to console and UI
-      console.log("Transcript JSON:", result);
-      updateStatus("Transcript JSON logged to console.");
-  
-      result.data.forEach((entry) => {
-        const timestamp = entry.timestamp || "no-time";
-        updateStatus(`[${timestamp}] ${entry.speaker}: ${entry.text}`);
-      });
+      const data = await response.json();
+      res.setHeader("Access-Control-Allow-Origin", "*");
+      res.status(200).json(data);
     } catch (err) {
-      console.error("Error fetching transcript:", err);
-      updateStatus("Error fetching transcript. See console for details.");
+      console.error("Server error fetching transcript:", err);
+      res.status(500).json({ error: "Unexpected server error" });
     }
   }
   
