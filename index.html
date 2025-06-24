@@ -59,7 +59,8 @@
         </button>
         <button
           id="downloadTranscriptBtn"
-          class="px-4 py-2 bg-purple-500 text-white rounded-md hover:bg-purple-600 transition-colors"
+          class="px-4 py-2 bg-purple-500 text-white rounded-md hover:bg-purple-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          disabled
         >
           Download Transcript
         </button>
@@ -93,6 +94,7 @@
       const avatarID = document.getElementById("avatarID");
       const voiceID = document.getElementById("voiceID");
       const taskInput = document.getElementById("taskInput");
+      const downloadBtn = document.getElementById("downloadTranscriptBtn");
 
       function updateStatus(message) {
         const timestamp = new Date().toLocaleTimeString();
@@ -138,6 +140,8 @@
       }
 
       async function createNewSession() {
+        downloadBtn.disabled = true;
+
         if (!sessionToken) {
           await getSessionToken();
         }
@@ -279,20 +283,18 @@
         if (room) room.disconnect();
 
         mediaElement.srcObject = null;
-        sessionInfo = null;
-        room = null;
-        mediaStream = null;
-        sessionToken = null;
-        document.querySelector("#startBtn").disabled = false;
 
-        updateStatus("Session closed");
+        updateStatus("Session closed. Transcript is ready.");
+        downloadBtn.disabled = false; // Enable download button
       }
 
       async function downloadTranscript() {
         if (!sessionInfo || !sessionToken) {
-          updateStatus("No active session to download transcript.");
+          updateStatus("No session found to fetch transcript.");
           return;
         }
+
+        updateStatus("Fetching transcript...");
 
         const response = await fetch(
           `${API_CONFIG.serverUrl}/v1/streaming.transcript?session_id=${sessionInfo.session_id}`,
@@ -330,16 +332,12 @@
         updateStatus("Transcript downloaded.");
       }
 
-      document
-        .querySelector("#startBtn")
-        .addEventListener("click", async () => {
-          await createNewSession();
-          await startStreamingSession();
-        });
+      document.querySelector("#startBtn").addEventListener("click", async () => {
+        await createNewSession();
+        await startStreamingSession();
+      });
 
-      document
-        .querySelector("#closeBtn")
-        .addEventListener("click", closeSession);
+      document.querySelector("#closeBtn").addEventListener("click", closeSession);
 
       document.querySelector("#talkBtn").addEventListener("click", () => {
         const text = taskInput.value.trim();
