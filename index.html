@@ -57,6 +57,12 @@
         >
           Repeat
         </button>
+        <button
+          id="downloadTranscriptBtn"
+          class="px-4 py-2 bg-purple-500 text-white rounded-md hover:bg-purple-600 transition-colors"
+        >
+          Download Transcript
+        </button>
       </div>
 
       <video
@@ -71,34 +77,29 @@
     </div>
 
     <script>
-      // Configuration
       const API_CONFIG = {
         apiKey: "ZmVjNDdmZDM5NmYwNGRmMmE5NTcyYjQ1YzA1YjNiY2EtMTc1MDc2NTYwMg==",
         serverUrl: "https://api.heygen.com",
       };
 
-      // Global variables
       let sessionInfo = null;
       let room = null;
       let mediaStream = null;
       let webSocket = null;
       let sessionToken = null;
 
-      // DOM Elements
       const statusElement = document.getElementById("status");
       const mediaElement = document.getElementById("mediaElement");
       const avatarID = document.getElementById("avatarID");
       const voiceID = document.getElementById("voiceID");
       const taskInput = document.getElementById("taskInput");
 
-      // Helper function to update status
       function updateStatus(message) {
         const timestamp = new Date().toLocaleTimeString();
         statusElement.innerHTML += `[${timestamp}] ${message}<br>`;
         statusElement.scrollTop = statusElement.scrollHeight;
       }
 
-      // Get session token
       async function getSessionToken() {
         const response = await fetch(
           `${API_CONFIG.serverUrl}/v1/streaming.create_token`,
@@ -110,13 +111,11 @@
             },
           }
         );
-
         const data = await response.json();
         sessionToken = data.data.token;
         updateStatus("Session token obtained");
       }
 
-      // Connect WebSocket
       async function connectWebSocket(sessionId) {
         const params = new URLSearchParams({
           session_id: sessionId,
@@ -132,14 +131,12 @@
 
         webSocket = new WebSocket(wsUrl);
 
-        // Handle WebSocket events
         webSocket.addEventListener("message", (event) => {
           const eventData = JSON.parse(event.data);
           console.log("Raw WebSocket event:", eventData);
         });
       }
 
-      // Create new session
       async function createNewSession() {
         if (!sessionToken) {
           await getSessionToken();
@@ -169,7 +166,6 @@
         const data = await response.json();
         sessionInfo = data.data;
 
-        // Create LiveKit Room
         room = new LivekitClient.Room({
           adaptiveStream: true,
           dynacast: true,
@@ -178,13 +174,11 @@
           },
         });
 
-        // Handle room events
         room.on(LivekitClient.RoomEvent.DataReceived, (message) => {
           const data = new TextDecoder().decode(message);
           console.log("Room message:", JSON.parse(data));
         });
 
-        // Handle media streams
         mediaStream = new MediaStream();
         room.on(LivekitClient.RoomEvent.TrackSubscribed, (track) => {
           if (track.kind === "video" || track.kind === "audio") {
@@ -199,7 +193,6 @@
           }
         });
 
-        // Handle media stream removal
         room.on(LivekitClient.RoomEvent.TrackUnsubscribed, (track) => {
           const mediaTrack = track.mediaStreamTrack;
           if (mediaTrack) {
@@ -207,7 +200,6 @@
           }
         });
 
-        // Handle room connection state changes
         room.on(LivekitClient.RoomEvent.Disconnected, (reason) => {
           updateStatus(`Room disconnected: ${reason}`);
         });
@@ -215,13 +207,10 @@
         await room.prepareConnection(sessionInfo.url, sessionInfo.access_token);
         updateStatus("Connection prepared");
 
-        // Connect WebSocket after room preparation
         await connectWebSocket(sessionInfo.session_id);
-
         updateStatus("Session created successfully");
       }
 
-      // Start streaming session
       async function startStreamingSession() {
         const startResponse = await fetch(
           `${API_CONFIG.serverUrl}/v1/streaming.start`,
@@ -237,7 +226,6 @@
           }
         );
 
-        // Connect to LiveKit room
         await room.connect(sessionInfo.url, sessionInfo.access_token);
         updateStatus("Connected to room");
 
@@ -245,7 +233,6 @@
         updateStatus("Streaming started successfully");
       }
 
-      // Send text to avatar
       async function sendText(text, taskType = "talk") {
         if (!sessionInfo) {
           updateStatus("No active session");
@@ -271,35 +258,25 @@
         updateStatus(`Sent text (${taskType}): ${text}`);
       }
 
-      // Close session
       async function closeSession() {
         if (!sessionInfo) {
           updateStatus("No active session");
           return;
         }
 
-        const response = await fetch(
-          `${API_CONFIG.serverUrl}/v1/streaming.stop`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${sessionToken}`,
-            },
-            body: JSON.stringify({
-              session_id: sessionInfo.session_id,
-            }),
-          }
-        );
+        await fetch(`${API_CONFIG.serverUrl}/v1/streaming.stop`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${sessionToken}`,
+          },
+          body: JSON.stringify({
+            session_id: sessionInfo.session_id,
+          }),
+        });
 
-        // Close WebSocket
-        if (webSocket) {
-          webSocket.close();
-        }
-        // Disconnect from LiveKit room
-        if (room) {
-          room.disconnect();
-        }
+        if (webSocket) webSocket.close();
+        if (room) room.disconnect();
 
         mediaElement.srcObject = null;
         sessionInfo = null;
@@ -311,16 +288,59 @@
         updateStatus("Session closed");
       }
 
-      // Event Listeners
+      async function downloadTranscript() {
+        if (!sessionInfo || !sessionToken) {
+          updateStatus("No active session to download transcript.");
+          return;
+        }
+
+        const response = await fetch(
+          `${API_CONFIG.serverUrl}/v1/streaming.transcript?session_id=${sessionInfo.session_id}`,
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${sessionToken}`,
+            },
+          }
+        );
+
+        const data = await response.json();
+
+        if (!data || !data.data || data.data.length === 0) {
+          updateStatus("Transcript is empty or not available.");
+          return;
+        }
+
+        const transcriptText = data.data
+          .map(
+            (entry) =>
+              `[${entry.timestamp || "no-time"}] ${entry.speaker}: ${entry.text}`
+          )
+          .join("\n");
+
+        const blob = new Blob([transcriptText], { type: "text/plain" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `transcript_${sessionInfo.session_id}.txt`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+
+        updateStatus("Transcript downloaded.");
+      }
+
       document
         .querySelector("#startBtn")
         .addEventListener("click", async () => {
           await createNewSession();
           await startStreamingSession();
         });
+
       document
         .querySelector("#closeBtn")
         .addEventListener("click", closeSession);
+
       document.querySelector("#talkBtn").addEventListener("click", () => {
         const text = taskInput.value.trim();
         if (text) {
@@ -328,6 +348,7 @@
           taskInput.value = "";
         }
       });
+
       document.querySelector("#repeatBtn").addEventListener("click", () => {
         const text = taskInput.value.trim();
         if (text) {
@@ -335,6 +356,10 @@
           taskInput.value = "";
         }
       });
+
+      document
+        .querySelector("#downloadTranscriptBtn")
+        .addEventListener("click", downloadTranscript);
     </script>
   </body>
 </html>
