@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>HeyGen Streaming API with Transcript</title>
+    <title>HeyGen Streaming API LiveKit (V2)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/livekit-client/dist/livekit-client.umd.min.js"></script>
     <meta charset="UTF-8" />
@@ -11,42 +11,21 @@
   <body class="bg-gray-100 p-5 font-sans">
     <div class="max-w-3xl mx-auto bg-white p-5 rounded-lg shadow-md">
       <div class="flex flex-wrap gap-2.5 mb-5">
-        <input id="avatarID" type="text" placeholder="Avatar ID" value="Wayne_20240711"
-          class="flex-1 min-w-[200px] p-2 border border-gray-300 rounded-md" />
-        <input id="voiceID" type="text" placeholder="Voice ID"
-          class="flex-1 min-w-[200px] p-2 border border-gray-300 rounded-md" />
-        <button id="startBtn"
-          class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors">
-          Start
-        </button>
-        <button id="closeBtn"
-          class="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors">
-          Close
-        </button>
+        <input id="avatarID" type="text" placeholder="Avatar ID" value="Wayne_20240711" class="flex-1 min-w-[200px] p-2 border border-gray-300 rounded-md" />
+        <input id="voiceID" type="text" placeholder="Voice ID" class="flex-1 min-w-[200px] p-2 border border-gray-300 rounded-md" />
+        <button id="startBtn" class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">Start</button>
+        <button id="closeBtn" class="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors">Close</button>
       </div>
 
       <div class="flex flex-wrap gap-2.5 mb-5">
-        <input id="taskInput" type="text" placeholder="Enter text for avatar to speak"
-          class="flex-1 min-w-[200px] p-2 border border-gray-300 rounded-md" />
-        <button id="talkBtn"
-          class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors">
-          Talk (LLM)
-        </button>
-        <button id="repeatBtn"
-          class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors">
-          Repeat
-        </button>
-        <button id="downloadTranscriptBtn"
-          class="px-4 py-2 bg-purple-500 text-white rounded-md hover:bg-purple-600 transition-colors">
-          Download Transcript
-        </button>
+        <input id="taskInput" type="text" placeholder="Enter text for avatar to speak" class="flex-1 min-w-[200px] p-2 border border-gray-300 rounded-md" />
+        <button id="talkBtn" class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors">Talk (LLM)</button>
+        <button id="repeatBtn" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors">Repeat</button>
+        <button id="downloadTranscriptBtn" class="px-4 py-2 bg-purple-500 text-white rounded-md hover:bg-purple-600 transition-colors">Download Transcript</button>
       </div>
 
       <video id="mediaElement" class="w-full max-h-[400px] border rounded-lg my-5" autoplay></video>
-
-      <div id="status"
-        class="p-2.5 bg-gray-50 border border-gray-300 rounded-md h-[150px] overflow-y-auto font-mono text-sm">
-      </div>
+      <div id="status" class="p-2.5 bg-gray-50 border border-gray-300 rounded-md h-[100px] overflow-y-auto font-mono text-sm"></div>
     </div>
 
     <script>
@@ -60,7 +39,7 @@
       let mediaStream = null;
       let webSocket = null;
       let sessionToken = null;
-      const transcriptLog = [];
+      let transcriptLog = [];
 
       const statusElement = document.getElementById("status");
       const mediaElement = document.getElementById("mediaElement");
@@ -103,15 +82,20 @@
           const eventData = JSON.parse(event.data);
           console.log("Raw WebSocket event:", eventData);
 
-          const avatarResponseTypes = ["task_result", "response", "event"];
-          if (avatarResponseTypes.includes(eventData.type) && eventData.text) {
+          if (eventData.type === "USER_TALKING_MESSAGE") {
             transcriptLog.push({
-              timestamp: new Date().toISOString(),
-              speaker: "Avatar",
+              speaker: "user",
               text: eventData.text,
-              type: eventData.type,
+              timestamp: new Date().toISOString(),
             });
-            updateStatus(`Avatar: ${eventData.text}`);
+          }
+
+          if (eventData.type === "AVATAR_TALKING_MESSAGE") {
+            transcriptLog.push({
+              speaker: "avatar",
+              text: eventData.text,
+              timestamp: new Date().toISOString(),
+            });
           }
         });
       }
@@ -148,13 +132,16 @@
           },
         });
 
+        room.on(LivekitClient.RoomEvent.DataReceived, (message) => {
+          const data = new TextDecoder().decode(message);
+          console.log("Room message:", JSON.parse(data));
+        });
+
+        mediaStream = new MediaStream();
         room.on(LivekitClient.RoomEvent.TrackSubscribed, (track) => {
           if (track.kind === "video" || track.kind === "audio") {
             mediaStream.addTrack(track.mediaStreamTrack);
-            if (
-              mediaStream.getVideoTracks().length > 0 &&
-              mediaStream.getAudioTracks().length > 0
-            ) {
+            if (mediaStream.getVideoTracks().length > 0 && mediaStream.getAudioTracks().length > 0) {
               mediaElement.srcObject = mediaStream;
               updateStatus("Media stream ready");
             }
@@ -162,14 +149,14 @@
         });
 
         room.on(LivekitClient.RoomEvent.TrackUnsubscribed, (track) => {
-          mediaStream.removeTrack(track.mediaStreamTrack);
+          const mediaTrack = track.mediaStreamTrack;
+          if (mediaTrack) mediaStream.removeTrack(mediaTrack);
         });
 
         room.on(LivekitClient.RoomEvent.Disconnected, (reason) => {
           updateStatus(`Room disconnected: ${reason}`);
         });
 
-        mediaStream = new MediaStream();
         await room.prepareConnection(sessionInfo.url, sessionInfo.access_token);
         updateStatus("Connection prepared");
 
@@ -188,22 +175,13 @@
         });
 
         await room.connect(sessionInfo.url, sessionInfo.access_token);
-        updateStatus("Streaming started");
+        updateStatus("Connected to room");
         document.querySelector("#startBtn").disabled = true;
+        updateStatus("Streaming started successfully");
       }
 
       async function sendText(text, taskType = "talk") {
-        if (!sessionInfo) {
-          updateStatus("No active session");
-          return;
-        }
-
-        transcriptLog.push({
-          timestamp: new Date().toISOString(),
-          speaker: "User",
-          text,
-          type: taskType,
-        });
+        if (!sessionInfo) return updateStatus("No active session");
 
         await fetch(`${API_CONFIG.serverUrl}/v1/streaming.task`, {
           method: "POST",
@@ -213,7 +191,7 @@
           },
           body: JSON.stringify({
             session_id: sessionInfo.session_id,
-            text: text,
+            text,
             task_type: taskType,
           }),
         });
@@ -222,10 +200,7 @@
       }
 
       async function closeSession() {
-        if (!sessionInfo) {
-          updateStatus("No active session");
-          return;
-        }
+        if (!sessionInfo) return updateStatus("No active session");
 
         await fetch(`${API_CONFIG.serverUrl}/v1/streaming.stop`, {
           method: "POST",
@@ -244,30 +219,27 @@
         room = null;
         mediaStream = null;
         sessionToken = null;
-        document.querySelector("#startBtn").disabled = false;
+        transcriptLog = [];
 
+        document.querySelector("#startBtn").disabled = false;
         updateStatus("Session closed");
       }
 
       function downloadTranscript() {
-        if (transcriptLog.length === 0) {
-          updateStatus("Transcript is empty.");
-          return;
-        }
+        if (!transcriptLog.length) return updateStatus("Transcript is empty.");
 
         const blob = new Blob([JSON.stringify(transcriptLog, null, 2)], {
           type: "application/json",
         });
-
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
-        a.download = `transcript_${new Date().toISOString()}.json`;
+        a.download = `transcript_${sessionInfo?.session_id || "session"}.json`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
 
-        updateStatus("Transcript downloaded as JSON.");
+        updateStatus("Transcript JSON downloaded.");
       }
 
       document.querySelector("#startBtn").addEventListener("click", async () => {
@@ -276,7 +248,6 @@
       });
 
       document.querySelector("#closeBtn").addEventListener("click", closeSession);
-
       document.querySelector("#talkBtn").addEventListener("click", () => {
         const text = taskInput.value.trim();
         if (text) {
