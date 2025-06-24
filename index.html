@@ -2,148 +2,46 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Ambi Pur</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>D-ID Live Agent Example</title>
+  <script src="https://cdn.d-id.com/sdk/2.0.6/agents/index.js"></script>
   <style>
-    * {
-      box-sizing: border-box;
-    }
-
     body {
-      margin: 0;
-      padding: 0;
-      background: linear-gradient(135deg, #4285F4, #EA4335, #FBBC05, #34A853);
-      background-size: 600% 600%;
-      animation: gradientShift 15s ease infinite;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-direction: column;
-      color: white;
-      text-align: center;
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background-color: #f4f4f4;
     }
 
-    @keyframes gradientShift {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
-    }
-
-    h1 {
-      font-size: 3rem;
-      margin: 0 0 10px 0;
-    }
-
-    p {
-      font-size: 1.2rem;
-      max-width: 600px;
-      margin-bottom: 40px;
-      color: #f0f0f0;
-    }
-
-    #heygen-streaming-embed {
-      width: 320px;
-      height: 320px;
-      border-radius: 50%;
-      border: 4px solid #fff;
-      box-shadow: 0px 8px 24px rgba(0, 0, 0, 0.3);
-      overflow: hidden;
-      transition: all 0.2s ease-in-out;
-      opacity: 0;
-      visibility: hidden;
-    }
-
-    #heygen-streaming-embed.show {
-      opacity: 1;
-      visibility: visible;
-    }
-
-    #heygen-streaming-embed.expand {
-      width: 640px;
-      height: 360px;
-      border-radius: 16px;
-      border: none;
-    }
-
-    #heygen-streaming-container {
-      width: 100%;
-      height: 100%;
-    }
-
-    #heygen-streaming-container iframe {
-      width: 100%;
-      height: 100%;
-      border: 0;
+    #agent-container {
+      width: 400px;
+      height: 500px;
+      margin: auto;
+      border: 1px solid #ccc;
+      background-color: #fff;
+      padding: 20px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
   </style>
 </head>
 <body>
-  <h1>Ambi Pur</h1>
-  <p>Welcome to Ambi Pur — Virtual Assistant.</p>
 
-  <!-- Heygen Embed Script -->
-  <div id="heygen-streaming-embed">
-    <div id="heygen-streaming-container">
-      <iframe
-        allowfullscreen="false"
-        title="Streaming Embed"
-        role="dialog"
-        allow="microphone"
-        src="https://labs.heygen.com/guest/streaming-embed?share=eyJxdWFsaXR5IjoiaGlnaCIsImF2YXRhck5hbWUiOiJHcmFoYW1fQmxhY2tfU3VpdF9wdWJsaWMiLCJwcmV2aWV3SW1nIjoiaHR0cHM6Ly9maWxlczIuaGV5Z2VuLmFpL2F2YXRhci92My9lMDRlYmFiY2M2Nzg0Y2I2OTU5YTg2NjYwNTQ3NDY1MF81NTM1MC9wcmV2aWV3X3RhbGtfMS53ZWJwIiwibmVlZFJlbW92ZUJhY2tncm91bmQiOnRydWUsImtub3dsZWRnZUJhc2VJZCI6IjkyYWI0ZWEwMDM4MTRiMmFhZmM0ODkwZTBmY2YwYjYxIiwidXNlcm5hbWUiOiI5NTAwYTdhOGZmODk0MGQ1OGJjMzRkMTUyZjEwMmEyMCJ9&inIFrame=1"
-      ></iframe>
-    </div>
-  </div>
+  <h2 style="text-align: center;">D-ID Live Agent</h2>
+  <div id="agent-container"></div>
 
   <script>
-    !function(window){
-      const host = "https://labs.heygen.com";
-      const wrapDiv = document.getElementById("heygen-streaming-embed");
-      const iframe = wrapDiv.querySelector("iframe");
-
-      let visible = false, initial = false;
-      let lastActionTime = Date.now();
-
-      function reloadStream() {
-        const src = iframe.src;
-        iframe.src = "";
-        setTimeout(() => { iframe.src = src; }, 500);
-      }
-
-      window.addEventListener("message", (e) => {
-        if (e.origin === host && e.data?.type === "streaming-embed") {
-          lastActionTime = Date.now();
-
-          if (e.data.action === "init") {
-            initial = true;
-            wrapDiv.classList.add("show");
-          } else if (e.data.action === "show") {
-            visible = true;
-            wrapDiv.classList.add("expand");
-          } else if (e.data.action === "hide") {
-            visible = false;
-            wrapDiv.classList.remove("expand");
-            // Reload on hide - try to recover from premature stream end
-            reloadStream();
-          }
-        }
+    async function startAgent() {
+      const agent = await DID.createDIDAgent({
+        apiKey: 'ZXZhbmRlci5mb3h4QGRzaXRpcC5jb20:Lrn4LeZTHLAWCeQXAdfQ9', // Replace with your API key
+        agentId: 'agt_Jd4BnTW4',   // Replace with your D-ID Agent ID
+        container: document.getElementById('agent-container'),
+        enableSpeech: true
       });
 
-      // Reload stream if no messages received for more than 5 minutes (300000 ms)
-      setInterval(() => {
-        if (initial && visible && (Date.now() - lastActionTime > 300000)) {
-          console.warn("No recent stream messages for 5 minutes - reloading iframe");
-          reloadStream();
-        }
-      }, 60000); // Check every 1 minute
+      agent.start();
+    }
 
-      // Reload iframe on iframe error event
-      iframe.addEventListener("error", () => {
-        console.warn("Iframe error detected - reloading iframe");
-        reloadStream();
-      });
-    }(globalThis);
+    startAgent();
   </script>
+
 </body>
 </html>
