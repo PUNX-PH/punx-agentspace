@@ -1,87 +1,219 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>D-ID Video Streaming Agent</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    body { font-family: Arial, sans-serif; background: #111; color: #fff; padding: 20px; }
-    video { width: 100%; max-width: 600px; margin-top: 20px; border-radius: 12px; }
-    input, button { padding: 10px; margin: 5px 0; font-size: 16px; width: 100%; }
-  </style>
-</head>
-<body>
-  <h1>D-ID Video Streaming Agent</h1>
+<html>
+  <head>
+    <title>D-ID Streaming POC</title>
+    <!-- added google fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Mulish:wght@300;400;700&display=swap" rel="stylesheet" />
 
-  <input type="text" id="inputText" placeholder="Say something to the AI" />
-  <button onclick="sendText()">Send</button>
-  <video id="agentVideo" autoplay playsinline></video>
-
-  <script>
-    const apiKey = "ZXZhbmRlci5mb3h4QGRzaXRpcC5jb20:rAPO4vw9SfmtqivYRHhf4";
-    const agentId = "agt_Jd4BnTW4";
-
-    let ws;
-    let pc;
-    const videoElement = document.getElementById("agentVideo");
-
-    async function createStream() {
-      const response = await fetch("https://api.d-id.com/talks/streams", {
-        method: "POST",
-        headers: {
-          "Authorization": `Basic ${btoa(apiKey)}`,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ agent_id: agentId })
-      });
-
-      const data = await response.json();
-
-      if (!data.offer || !data.offer.sdp) {
-        console.error("Invalid SDP offer from D-ID API:", data);
-        return;
+    <style>
+      .peerConnectionState-new {
+        color: cornflowerblue;
+      }
+      .peerConnectionState-connecting {
+        color: orange;
+      }
+      .peerConnectionState-connected {
+        color: green;
+      }
+      .peerConnectionState-disconnected,
+      .peerConnectionState-closed,
+      .peerConnectionState-failed {
+        color: red;
       }
 
-      const { id, offer, ice_servers, ws_url } = data;
-
-      // 1. Create PeerConnection
-      pc = new RTCPeerConnection({ iceServers: ice_servers });
-      pc.ontrack = (event) => {
-        videoElement.srcObject = event.streams[0];
-      };
-
-      // 2. Set remote offer (ONLY the SDP string)
-      await pc.setRemoteDescription({ type: "offer", sdp: offer.sdp });
-
-      // 3. Create and set local answer
-      const answer = await pc.createAnswer();
-      await pc.setLocalDescription(answer);
-
-      // 4. Send SDP answer back to D-ID
-      await fetch(`https://api.d-id.com/talks/streams/${id}/sdp`, {
-        method: "POST",
-        headers: {
-          "Authorization": `Basic ${btoa(apiKey)}`,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ answer: pc.localDescription.sdp })
-      });
-
-      // 5. WebSocket connection
-      ws = new WebSocket(ws_url);
-      ws.onopen = () => console.log("WebSocket connected");
-      ws.onmessage = (msg) => console.log("From D-ID:", msg.data);
-    }
-
-    function sendText() {
-      const text = document.getElementById("inputText").value;
-      if (ws && ws.readyState === WebSocket.OPEN) {
-        ws.send(JSON.stringify({ type: "user", message: text }));
-        document.getElementById("inputText").value = "";
+      .iceConnectionState-new {
+        color: cornflowerblue;
       }
-    }
+      .iceConnectionState-checking {
+        color: orange;
+      }
+      .iceConnectionState-connected,
+      .iceConnectionState-completed {
+        color: green;
+      }
+      .peerConnectionState-disconnected,
+      .peerConnectionState-closed,
+      .peerConnectionState-failed {
+        color: red;
+      }
 
-    createStream(); // Start stream
-  </script>
-</body>
+      .iceGatheringState-new {
+        color: cornflowerblue;
+      }
+      .iceGatheringState-gathering {
+        color: orange;
+      }
+      .iceGatheringState-complete {
+        color: black;
+      }
+
+      .signalingState-stable {
+        color: green;
+      }
+      .signalingState-have-local-offer,
+      .signalingState-have-remote-offer,
+      .signalingState-have-local-pranswer,
+      .signalingState-have-remote-pranswer {
+        color: cornflowerblue;
+      }
+      .signalingState-closed {
+        color: red;
+      }
+
+      .streamingState-streaming {
+        color: green;
+      }
+
+      .streamingState-empty {
+        color: grey;
+      }
+
+      .streamEvent-started {
+        color: green;
+      }
+
+      .streamEvent-done {
+        color: orange;
+      }
+
+      .streamEvent-ready {
+        color: green;
+      }
+
+      .streamEvent-error {
+        color: red;
+      }
+
+      .streamEvent-dont-care {
+        color: gray;
+      }
+
+      /* added css from here */
+
+      body * {
+        font-family: 'Mulish', sans-serif;
+        text-align: center;
+      }
+
+      #content {
+        width: 820px;
+        position: relative;
+        margin: 0 auto;
+      }
+
+      .button-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .button-row {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        gap: 10px;
+      }
+
+      button {
+        padding: 10px 20px;
+        border-radius: 5px;
+        border: none;
+        font-size: 16px;
+        margin: 0 5px;
+        background-color: #7459fe;
+        color: #fff;
+      }
+
+      button:hover {
+        background-color: #9480ff;
+        cursor: pointer;
+        transition: all 0.2s ease-out;
+      }
+
+      #status {
+        clear: both;
+        padding: 20px 0 0 0;
+        text-align: left;
+        display: inline-block;
+        zoom: 1;
+        line-height: 140%;
+        font-size: 15px;
+      }
+
+      #status div {
+        padding-bottom: 10px;
+      }
+
+      #video-wrapper {
+        background: url(bg.png);
+        height: 500px;
+        background-position: top;
+      }
+
+      #video-wrapper div {
+        position: relative;
+        height: 100%;
+        width: 400px;
+        margin: 0 auto;
+      }
+
+      video {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        /*border:1px solid;*/
+        border-radius: 50%;
+        background-color: #fff;
+
+        object-fit: cover;
+        background-size: cover;
+        background-repeat: no-repeat;
+        background-position: center;
+        background-image: url("alex_v2_idle_image.png");
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- adde "id=content" -->
+    <div id="content">
+      <!-- added "id=video-wrapper" -->
+      <div id="video-wrapper">
+        <div>
+          <video id="idle-video-element" width="400" height="400" autoplay loop style="opacity: 1"></video>
+          <video id="stream-video-element" width="400" height="400" autoplay style="opacity: 0"></video>
+        </div>
+      </div>
+      <br />
+
+      <!-- added div#buttons -->
+      <div class="button-container">
+        <div class="button-row">
+          <button id="connect-button" type="button">Connect</button>
+          <button id="destroy-button" type="button">Destroy</button>
+        </div>
+        <div class="button-row">
+          <button id="audio-button" type="button">Audio</button>
+          <button id="text-button" type="button">Text</button>
+        </div>
+      </div>
+
+      <!-- added div#status -->
+      <div id="status">
+        <!-- removed the wrapping <div> tags -->
+        ICE gathering status: <label id="ice-gathering-status-label"></label><br />
+        ICE status: <label id="ice-status-label"></label><br />
+        Peer connection status: <label id="peer-status-label"></label><br />
+        Signaling status: <label id="signaling-status-label"></label><br />
+        Last stream event: <label id="stream-event-label"></label><br />
+        Streaming status: <label id="streaming-status-label"></label><br />
+      </div>
+    </div>
+
+    <script type="module" src="./streaming-client-api.js"></script>
+  </body>
 </html>
