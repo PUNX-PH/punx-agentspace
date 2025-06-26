@@ -2,102 +2,106 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>D-ID Streaming AI</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Shark Tank AI - Ignite</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      background: linear-gradient(to bottom, #0d0d2b, #1d1d3d);
+      font-family: 'Arial', sans-serif;
+      color: white;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+    .avatar-box {
+      border-radius: 20px;
+      overflow: hidden;
+      max-width: 400px;
+      background-color: #111132;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+    }
+    .glow-btn {
+      background: linear-gradient(90deg, #9f5afd, #754ef9);
+      padding: 12px 24px;
+      border-radius: 9999px;
+      color: white;
+      font-weight: bold;
+      font-size: 1rem;
+      margin-top: 20px;
+      transition: transform 0.2s;
+    }
+    .glow-btn:hover {
+      transform: scale(1.05);
+    }
+  </style>
 </head>
-<body class="bg-gray-100 p-6">
-  <div class="max-w-xl mx-auto bg-white rounded-xl shadow-md p-6 space-y-4">
-    <h1 class="text-2xl font-bold text-center">🤖 D-ID Streaming AI</h1>
-    <div id="status" class="text-center text-green-600">Connecting to agent...</div>
+<body>
 
-    <video id="video" autoplay muted playsinline class="w-full rounded-lg border" style="aspect-ratio: 3/4;"></video>
+  <div class="avatar-box p-6 text-center">
+    <div class="text-3xl font-extrabold mb-2">🔥 iGnite</div>
+    <div class="text-4xl font-bold tracking-wide">SHARK TANK <span class="bg-purple-600 text-white px-3 py-1 rounded-lg text-base align-middle">AI</span></div>
+    
+    <div class="mt-4 text-sm font-medium">TIME LEFT</div>
+    <div class="text-2xl bg-purple-600 px-4 py-1 inline-block rounded-lg font-bold">4:36</div>
 
-    <div class="flex mt-4 space-x-2">
-      <input
-        id="userInput"
-        type="text"
-        placeholder="Type your message..."
-        class="flex-1 border border-gray-300 rounded px-4 py-2"
-      />
-      <button
-        onclick="sendTextToAgent()"
-        class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-      >
-        Send
-      </button>
+    <div class="mt-4">
+      <!-- Replace with HeyGen avatar stream -->
+      <div id="heygen-avatar-container" class="mt-4 mb-4 rounded-lg overflow-hidden">
+        <!-- HeyGen Script injected here -->
+      </div>
     </div>
+
+    <div class="text-xl font-bold mt-2">Lexi Leap</div>
+    <div class="text-purple-400 font-medium">The Innovation Futurist</div>
   </div>
 
-  <script type="module">
-    import * as DID from "https://cdn.jsdelivr.net/npm/@d-id/client-sdk/+esm";
+  <button class="glow-btn">END SESSION</button>
 
-    let agentManager;
-
-    async function initAgent() {
-      try {
-        agentManager = await DID.createAgentManager("agt_Jd4BnTW4", {
-          auth: {
-            type: "key",
-            clientKey: "ZXZhbmRlci5mb3h4QGRzaXRpcC5jb20:6ZPRGocDVi5Z82-f71CHF"
-          },
-          stream: {
-            video: true,
-            audio: true
-          },
-          streamOptions: {
-            compatibilityMode: "auto",
-            streamWarmup: true
-          },
-          callbacks: {
-            onStreamStart: () => {
-              document.getElementById("status").innerText = "✅ Agent ready!";
-            },
-            onFrame: (frame) => {
-              const url = URL.createObjectURL(frame);
-              const video = document.getElementById("video");
-              video.src = url;
-              video.play();
-            },
-            onError: (err) => {
-              console.error("D-ID error:", err);
-              document.getElementById("status").innerText = "❌ Error occurred!";
-            }
-          }
-        });
-
-        await agentManager.connect();
-      } catch (e) {
-        console.error("Agent connection failed:", e);
-        document.getElementById("status").innerText = "❌ Failed to connect";
-      }
-    }
-
-    async function sendTextToAgent() {
-      const inputText = document.getElementById("userInput").value;
-      if (!inputText || !agentManager) return;
-
-      try {
-        // Call your backend proxy to trigger the agent response (if needed)
-        await fetch("/api/speak", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            agentId: "agt_Jd4BnTW4",
-            inputText: inputText
-          })
-        });
-
-        await agentManager.speak({ type: "text", input: inputText });
-        document.getElementById("userInput").value = "";
-      } catch (e) {
-        console.error("Send failed:", e);
-        document.getElementById("status").innerText = "❌ Send failed";
-      }
-    }
-
-    window.onload = initAgent;
-    window.sendTextToAgent = sendTextToAgent;
+  <!-- HEYGEN EMBED SCRIPT -->
+  <script>
+    !function(window){
+      const host="https://labs.heygen.com",
+      url=host+"/guest/streaming-embed?share=eyJxdWFsaXR5IjoiaGlnaCIsImF2YXRhck5hbWUiOiJLYXR5YV9CbGFja19TdWl0X3B1YmxpYyIsInByZXZpZXdJbWciOiJodHRwczovL2ZpbGVzMi5oZXlnZW4uYWkvYXZhdGFyL3YzL2RhNWNiYTZiYzdiMzRjNWVhMTM5Zjc3ZGE5OGZkYzA0XzU1MzcwL3ByZXZpZXdfdGFsa18xLndlYnAiLCJuZWVkUmVtb3ZlQmFja2dyb3VuZCI6dHJ1ZSwia25vd2xlZGdlQmFzZUlkIjoiNWVlYzhhZTRiMDVmNGI5Njk2YjI1Njg5MDY1MDM4OTYiLCJ1c2VybmFtZSI6ImZlYzQ3ZmQzOTZmMDRkZjJhOTU3MmI0NWMwNWIzYmNhIn0=&inIFrame=1",
+      clientWidth=document.body.clientWidth,
+      wrapDiv=document.createElement("div");
+      wrapDiv.id="heygen-streaming-embed";
+      const container=document.createElement("div");
+      container.id="heygen-streaming-container";
+      const stylesheet=document.createElement("style");
+      stylesheet.innerHTML=`
+        #heygen-streaming-embed {
+          z-index: 9999;
+          position: relative;
+          margin: 0 auto;
+          width: 100%;
+          height: 250px;
+          border-radius: 12px;
+          overflow: hidden;
+        }
+        #heygen-streaming-container {
+          width: 100%;
+          height: 100%;
+        }
+        #heygen-streaming-container iframe {
+          width: 100%;
+          height: 100%;
+          border: 0;
+        }`;
+      const iframe=document.createElement("iframe");
+      iframe.allowFullscreen=!1;
+      iframe.title="Streaming Embed";
+      iframe.role="dialog";
+      iframe.allow="microphone";
+      iframe.src=url;
+      container.appendChild(iframe);
+      wrapDiv.appendChild(stylesheet);
+      wrapDiv.appendChild(container);
+      document.getElementById("heygen-avatar-container").appendChild(wrapDiv);
+    }(globalThis);
   </script>
 </body>
 </html>
