@@ -8,7 +8,7 @@ export default async function handler(req, res) {
     const response = await fetch(`https://api.d-id.com/agents/${agentId}/chat`, {
       method: "POST",
       headers: {
-        "Authorization": "Basic ZXZhbmRlci5mb3h4QGRzaXRpcC5jb20:3vPGhYgaZ6NDukM8jUTKp", // OR Bearer API_KEY
+        "Authorization": "Basic ZXZhbmRlci5mb3h4QGRzaXRpcC5jb20:6ZPRGocDVi5Z82-f71CHF", // OR Bearer API_KEY
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
