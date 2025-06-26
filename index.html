@@ -11,36 +11,48 @@
       let agentManager;
 
       async function initDIDAgent() {
-        agentManager = await DID.createAgentManager("agt_Jd4BnTW4", {
-          auth: { type: "key", clientKey: "ZXZhbmRlci5mb3h4QGRzaXRpcC5jb20:3vPGhYgaZ6NDukM8jUTKp" },
-          stream: { video: true, audio: true },
-          streamOptions: {
-            compatibilityMode: "auto",
-            streamWarmup: true,
-          },
-          callbacks: {
-            onStreamStart: () => {
-              document.getElementById("status").innerText = "✅ Connected to Agent!";
+        try {
+          agentManager = await DID.createAgentManager("YOUR_AGENT_ID_HERE", {
+            auth: {
+              type: "key",
+              clientKey: "YOUR_CLIENT_KEY_HERE"
             },
-            onFrame: (frame) => {
-              const url = URL.createObjectURL(frame);
-              const video = document.getElementById("video");
-              video.src = url;
-              video.play();
+            stream: {
+              video: true,
+              audio: true
             },
-            onError: (err) => {
-              console.error(err);
-              document.getElementById("status").innerText = "❌ Error occurred!";
+            streamOptions: {
+              compatibilityMode: "auto",
+              streamWarmup: true
             },
-          },
-        });
+            callbacks: {
+              onStreamStart: () => {
+                document.getElementById("status").innerText = "✅ Connected to Agent!";
+              },
+              onFrame: (frame) => {
+                const url = URL.createObjectURL(frame);
+                const video = document.getElementById("video");
+                video.src = url;
+                video.play();
+              },
+              onError: (err) => {
+                console.error("D-ID error:", err);
+                document.getElementById("status").innerText = "❌ Error occurred!";
+              }
+            }
+          });
 
-        await agentManager.connect();
+          await agentManager.connect();
+        } catch (e) {
+          console.error("Agent init failed:", e);
+          document.getElementById("status").innerText = "❌ Failed to connect";
+        }
       }
 
       async function sendTextToAgent() {
         const input = document.getElementById("userInput").value;
         if (!input || !agentManager) return;
+
         await agentManager.speak({ type: "text", input });
         document.getElementById("userInput").value = "";
       }
@@ -49,18 +61,19 @@
       window.sendTextToAgent = sendTextToAgent;
     </script>
   </head>
+
   <body class="bg-gray-100 p-6">
     <div class="max-w-xl mx-auto bg-white rounded-xl shadow-md p-6 space-y-4">
-      <h1 class="text-2xl font-bold">🧠 D-ID Streaming AI</h1>
-      <div id="status" class="text-green-600">Connecting...</div>
+      <h1 class="text-2xl font-bold text-center">🤖 D-ID Streaming AI</h1>
+      <div id="status" class="text-center text-green-600">Connecting...</div>
 
-      <video id="video" autoplay muted playsinline class="w-full rounded-lg border"></video>
+      <video id="video" autoplay muted playsinline class="w-full rounded-lg border" style="aspect-ratio: 3/4;"></video>
 
-      <div class="flex space-x-2">
+      <div class="flex mt-4 space-x-2">
         <input
           id="userInput"
           type="text"
-          placeholder="Say something..."
+          placeholder="Type a message..."
           class="flex-1 border border-gray-300 rounded px-4 py-2"
         />
         <button
