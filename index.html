@@ -1,190 +1,57 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <title>HeyGen with Transcript + AssemblyAI</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-gray-100 text-gray-900 p-6">
-  <h1 class="text-2xl font-bold mb-4">HeyGen Avatar + Voice Transcription</h1>
+  <head>
+    <meta charset="UTF-8" />
+    <title>D-ID Interactive Agent</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.d-id.com/sdk/v1.0/d-id-sdk.umd.min.js"></script>
+  </head>
+  <body class="bg-gray-100 flex flex-col items-center justify-center min-h-screen">
+    <h1 class="text-2xl font-bold mb-4">D-ID Interactive Agent</h1>
 
-  <!-- Transcript Section -->
-  <div class="mt-6 bg-white p-4 rounded shadow-md">
-    <h2 class="text-xl font-semibold mb-2">Transcript</h2>
-    <div id="transcriptLog" class="space-y-1 text-sm max-h-64 overflow-y-auto"></div>
-    <button id="downloadBtn" class="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
-      Download Transcript JSON
-    </button>
-  </div>
+    <!-- Video container for agent -->
+    <div id="d-id-video-container" class="w-[360px] h-[480px] bg-black rounded-lg shadow-lg mb-4 overflow-hidden"></div>
 
-  <!-- Recording Controls -->
-  <div class="mt-6">
-    <button onclick="startRecording()" class="mr-2 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">🎙️ Start Voice Recording</button>
-    <button onclick="stopRecordingAndTranscribe().then(showTranscription)" class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">🛑 Stop & Transcribe</button>
-  </div>
+    <!-- User Input -->
+    <div class="flex gap-2">
+      <input
+        id="userInput"
+        type="text"
+        placeholder="Ask something..."
+        class="p-2 border rounded w-64"
+      />
+      <button
+        onclick="sendToAgent()"
+        class="bg-blue-500 hover:bg-blue-700 text-white px-4 py-2 rounded"
+      >
+        Send
+      </button>
+    </div>
 
-  <script>
-    const transcript = [];
-    const transcriptLog = document.getElementById('transcriptLog');
-    const downloadBtn = document.getElementById('downloadBtn');
+    <script>
+      let agent;
 
-    // Capture avatar & user messages
-    window.addEventListener("message", (event) => {
-      const allowedOrigin = "https://labs.heygen.com";
-      if (event.origin !== allowedOrigin) return;
+      async function initAgent() {
+        // Initialize D-ID agent
+        agent = await DID.createAgent({
+          agentId: 'YOUR_AGENT_ID_HERE',
+          containerId: 'd-id-video-container',
+          enableMicrophone: true, // set to false if you only want text input
+        });
 
-      const { type, data } = event.data || {};
+        await agent.start();
+      }
 
-      if (type === "USER_TALKING_MESSAGE") logMessage("User", data?.text);
-      if (type === "AVATAR_TALKING_MESSAGE") logMessage("Avatar", data?.text);
-    });
-
-    function logMessage(speaker, text) {
-      if (!text) return;
-      const time = new Date().toISOString();
-      transcript.push({ speaker, text, timestamp: time });
-      const entry = document.createElement('div');
-      entry.innerHTML = `<strong>${speaker}:</strong> ${text}`;
-      transcriptLog.appendChild(entry);
-    }
-
-    downloadBtn.addEventListener("click", () => {
-      if (transcript.length === 0) return alert("Transcript is empty.");
-      const blob = new Blob([JSON.stringify(transcript, null, 2)], { type: "application/json" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `heygen_transcript_${Date.now()}.json`;
-      a.click();
-      URL.revokeObjectURL(url);
-    });
-
-    // 🎤 AssemblyAI Audio Recording & Upload
-    let mediaRecorder;
-    let audioChunks = [];
-
-    async function startRecording() {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      mediaRecorder = new MediaRecorder(stream);
-      mediaRecorder.ondataavailable = (event) => audioChunks.push(event.data);
-      mediaRecorder.start();
-      console.log("Recording started...");
-    }
-
-    async function stopRecordingAndTranscribe() {
-      return new Promise((resolve) => {
-        mediaRecorder.onstop = async () => {
-          const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
-
-          const uploadRes = await fetch("https://api.assemblyai.com/v2/upload", {
-            method: "POST",
-            headers: { "authorization": "0b041869f4ba489b9cd9e305bac99464" },
-            body: audioBlob
-          });
-          const { upload_url } = await uploadRes.json();
-
-          const transcriptRes = await fetch("https://api.assemblyai.com/v2/transcript", {
-            method: "POST",
-            headers: {
-              "authorization": "0b041869f4ba489b9cd9e305bac99464",
-              "content-type": "application/json"
-            },
-            body: JSON.stringify({ audio_url: upload_url })
-          });
-          const { id } = await transcriptRes.json();
-
-          // Poll
-          let completed = false, text = "";
-          while (!completed) {
-            const polling = await fetch(`https://api.assemblyai.com/v2/transcript/${id}`, {
-              headers: { authorization: "0b041869f4ba489b9cd9e305bac99464" }
-            });
-            const data = await polling.json();
-            if (data.status === "completed") {
-              completed = true;
-              text = data.text;
-            } else if (data.status === "error") {
-              console.error("Transcription error:", data.error);
-              break;
-            }
-            await new Promise(r => setTimeout(r, 3000));
-          }
-          resolve(text);
-        };
-        mediaRecorder.stop();
-      });
-    }
-
-    function showTranscription(text) {
-      logMessage("Transcription (AssemblyAI)", text);
-    }
-  </script>
-
-  <!-- HeyGen Avatar Embed Code -->
-  <script>
-    !function(window){
-      const host="https://labs.heygen.com",
-      url=host+"/guest/streaming-embed?share=eyJxdWFsaXR5IjoiaGlnaCIsImF2YXRhck5hbWUiOiJBbnRob255X0Nhc3VhbExvb2tfcHVibGljIiwicHJldmlld0ltZyI6Imh0dHBzOi8vZmlsZXMyLmhleWdlbi5haS9hdmF0YXIvdjMvMWM2NmQyYjMwYTE1NGFkY2FiZTBmYjkyYmVlYmRhMTlfNTU4MjAvcHJldmlld190YXJnZXQud2VicCIsIm5lZWRSZW1vdmVCYWNrZ3JvdW5kIjpmYWxzZSwia25vd2xlZGdlQmFzZUlkIjoiNWVlYzhhZTRiMDVmNGI5Njk2YjI1Njg5MDY1MDM4OTYiLCJ1c2VybmFtZSI6ImZlYzQ3ZmQzOTZmMDRkZjJhOTU3MmI0NWMwNWIzYmNhIn0%3D&inIFrame=1",
-      clientWidth=document.body.clientWidth,
-      wrapDiv=document.createElement("div");
-      wrapDiv.id="heygen-streaming-embed";
-      const container=document.createElement("div");
-      container.id="heygen-streaming-container";
-      const stylesheet=document.createElement("style");
-      stylesheet.innerHTML=`
-        #heygen-streaming-embed {
-          z-index: 9999;
-          position: fixed;
-          left: 40px;
-          bottom: 40px;
-          width: 200px;
-          height: 200px;
-          border-radius: 50%;
-          border: 2px solid #fff;
-          box-shadow: 0px 8px 24px 0px rgba(0, 0, 0, 0.12);
-          transition: all linear 0.1s;
-          overflow: hidden;
-          opacity: 0;
-          visibility: hidden;
+      async function sendToAgent() {
+        const input = document.getElementById('userInput').value;
+        if (input && agent) {
+          agent.sendText(input);
         }
-        #heygen-streaming-embed.show {
-          opacity: 1;
-          visibility: visible;
-        }
-        #heygen-streaming-embed.expand {
-          ${clientWidth<540?"height: 266px; width: 96%; left: 50%; transform: translateX(-50%);":"height: 366px; width: calc(366px * 16 / 9);"}
-          border: 0;
-          border-radius: 8px;
-        }
-        #heygen-streaming-container {
-          width: 100%;
-          height: 100%;
-        }
-        #heygen-streaming-container iframe {
-          width: 100%;
-          height: 100%;
-          border: 0;
-        }
-      `;
-      const iframe=document.createElement("iframe");
-      iframe.allowFullscreen=!1;
-      iframe.title="Streaming Embed";
-      iframe.role="dialog";
-      iframe.allow="microphone";
-      iframe.src=url;
-      let visible=!1,initial=!1;
-      window.addEventListener("message",(e=>{
-        e.origin===host&&e.data&&e.data.type&&"streaming-embed"===e.data.type&&(
-          "init"===e.data.action?(initial=!0,wrapDiv.classList.toggle("show",initial)):
-          "show"===e.data.action?(visible=!0,wrapDiv.classList.toggle("expand",visible)):
-          "hide"===e.data.action&&(visible=!1,wrapDiv.classList.toggle("expand",visible))
-        );
-      }));
-      container.appendChild(iframe);
-      wrapDiv.appendChild(stylesheet);
-      wrapDiv.appendChild(container);
-      document.body.appendChild(wrapDiv);
-    }(globalThis);
-  </script>
-</body>
+      }
+
+      // Init on page load
+      window.onload = initAgent;
+    </script>
+  </body>
 </html>
