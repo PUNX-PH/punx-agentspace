@@ -1,87 +1,75 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>D-ID Agent Streaming via Backend</title>
-  <script type="module">
-    import * as sdk from 'https://cdn.jsdelivr.net/npm/@d-id/client-sdk/+esm';
+  <head>
+    <meta charset="UTF-8" />
+    <title>D-ID Streaming Agent</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script type="module">
+      import * as DID from "https://cdn.jsdelivr.net/npm/@d-id/client-sdk/+esm";
 
-    const agentId = 'agt_Jd4BnTW4'; // Your Agent ID
-    const clientKey = 'ZXZhbmRlci5mb3h4QGRzaXRpcC5jb20:kJJZJwfWOUGXcvigkSR19'; // Optional if needed for SDK
+      let agentManager;
 
-    const auth = {
-      type: 'key',
-      clientKey: clientKey
-    };
+      async function initDIDAgent() {
+        agentManager = await DID.createAgentManager("YOUR_AGENT_ID_HERE", {
+          auth: { type: "key", clientKey: "YOUR_CLIENT_KEY_HERE" },
+          stream: { video: true, audio: true },
+          streamOptions: {
+            compatibilityMode: "auto",
+            streamWarmup: true,
+          },
+          callbacks: {
+            onStreamStart: () => {
+              document.getElementById("status").innerText = "✅ Connected to Agent!";
+            },
+            onFrame: (frame) => {
+              const url = URL.createObjectURL(frame);
+              const video = document.getElementById("video");
+              video.src = url;
+              video.play();
+            },
+            onError: (err) => {
+              console.error(err);
+              document.getElementById("status").innerText = "❌ Error occurred!";
+            },
+          },
+        });
 
-    let agentManager;
-
-    const callbacks = {
-      onSrcObjectReady(value) {
-        document.getElementById('video').srcObject = value;
-      },
-      onVideoStateChange(state) {
-        document.getElementById('status').textContent = 'Video state: ' + state;
-      },
-      onError(error) {
-        console.error('D-ID SDK Error:', error);
-        document.getElementById('status').textContent = 'Error: ' + error.message;
+        await agentManager.connect();
       }
-    };
 
-    async function startStreaming(chatId) {
-      agentManager = await sdk.createAgentManager(agentId, {
-        auth,
-        callbacks,
-        streamOptions: {
-          compatibilityMode: 'auto',
-          streamWarmup: true
-        }
-      });
-
-      await agentManager.connect({ chatId });
-      document.getElementById('status').textContent = 'Connected to Agent';
-    }
-
-    async function createChatAndStart() {
-      const response = await fetch('/api/chat', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ agentId })
-      });
-
-      const data = await response.json();
-      if (data?.id) {
-        await startStreaming(data.id);
-      } else {
-        document.getElementById('status').textContent = 'Failed to start chat session';
-        console.error('Chat creation failed:', data);
+      async function sendTextToAgent() {
+        const input = document.getElementById("userInput").value;
+        if (!input || !agentManager) return;
+        await agentManager.speak({ type: "text", input });
+        document.getElementById("userInput").value = "";
       }
-    }
 
-    async function sendMessage() {
-      const input = document.getElementById('input');
-      const message = input.value.trim();
-      if (!message || !agentManager) return;
+      window.onload = initDIDAgent;
+      window.sendTextToAgent = sendTextToAgent;
+    </script>
+  </head>
+  <body class="bg-gray-100 p-6">
+    <div class="max-w-xl mx-auto bg-white rounded-xl shadow-md p-6 space-y-4">
+      <h1 class="text-2xl font-bold">🧠 D-ID Streaming AI</h1>
+      <div id="status" class="text-green-600">Connecting...</div>
 
-      document.getElementById('status').textContent = 'Sending...';
-      await agentManager.chat(message);
-      input.value = '';
-    }
+      <video id="video" autoplay muted playsinline class="w-full rounded-lg border"></video>
 
-    window.addEventListener('DOMContentLoaded', () => {
-      createChatAndStart();
-      document.getElementById('sendBtn').onclick = sendMessage;
-    });
-  </script>
-</head>
-<body style="font-family: sans-serif; text-align: center; padding: 2rem; background: #121212; color: white;">
-  <h1>D-ID Agent Chat</h1>
-  <video id="video" autoplay playsinline width="480" height="360" style="border: 2px solid white; border-radius: 10px;"></video>
-  <p id="status">Initializing...</p>
-  <input id="input" type="text" placeholder="Say something..." style="padding: 0.5rem; width: 300px;"/>
-  <button id="sendBtn" style="padding: 0.5rem 1rem; margin-left: 0.5rem;">Send</button>
-</body>
+      <div class="flex space-x-2">
+        <input
+          id="userInput"
+          type="text"
+          placeholder="Say something..."
+          class="flex-1 border border-gray-300 rounded px-4 py-2"
+        />
+        <button
+          onclick="sendTextToAgent()"
+          class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+        >
+          Send
+        </button>
+      </div>
+    </div>
+  </body>
 </html>
