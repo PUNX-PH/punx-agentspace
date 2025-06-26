@@ -1,61 +1,87 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>D‑ID Agent Live Chat</title>
+  <meta charset="UTF-8">
+  <title>D-ID Agent Streaming via Backend</title>
   <script type="module">
     import * as sdk from 'https://cdn.jsdelivr.net/npm/@d-id/client-sdk/+esm';
 
-    const agentId = 'agt_Jd4BnTW4';
-    const auth = { type: 'key', clientKey: 'ZXZhbmRlci5mb3h4QGRzaXRpcC5jb20:rAPO4vw9SfmtqivYRHhf4' };
+    const agentId = 'agt_Jd4BnTW4'; // Your Agent ID
+    const clientKey = 'YOUR_CLIENT_KEY'; // Optional if needed for SDK
 
-    const callbacks = {
-      onSrcObjectReady(value) {
-        video.srcObject = value;
-      },
-      onVideoStateChange(state) {
-        status.textContent = `Video state: ${state}`;
-      },
-      onError(err) {
-        console.error('Agent SDK error:', err);
-        status.textContent = `Error: ${err.message}`;
-      }
+    const auth = {
+      type: 'key',
+      clientKey: clientKey
     };
-
-    const streamOptions = { compatibilityMode: 'auto', streamWarmup: true };
 
     let agentManager;
 
-    async function initAgent() {
+    const callbacks = {
+      onSrcObjectReady(value) {
+        document.getElementById('video').srcObject = value;
+      },
+      onVideoStateChange(state) {
+        document.getElementById('status').textContent = 'Video state: ' + state;
+      },
+      onError(error) {
+        console.error('D-ID SDK Error:', error);
+        document.getElementById('status').textContent = 'Error: ' + error.message;
+      }
+    };
+
+    async function startStreaming(chatId) {
       agentManager = await sdk.createAgentManager(agentId, {
         auth,
         callbacks,
-        streamOptions
+        streamOptions: {
+          compatibilityMode: 'auto',
+          streamWarmup: true
+        }
       });
-      await agentManager.connect();
-      status.textContent = 'Connected — ready to chat';
+
+      await agentManager.connect({ chatId });
+      document.getElementById('status').textContent = 'Connected to Agent';
+    }
+
+    async function createChatAndStart() {
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ agentId })
+      });
+
+      const data = await response.json();
+      if (data?.id) {
+        await startStreaming(data.id);
+      } else {
+        document.getElementById('status').textContent = 'Failed to start chat session';
+        console.error('Chat creation failed:', data);
+      }
     }
 
     async function sendMessage() {
-      const text = input.value.trim();
-      if (!text) return;
-      status.textContent = 'Sending…';
-      await agentManager.chat(text);
-      status.textContent = 'Awaiting response…';
+      const input = document.getElementById('input');
+      const message = input.value.trim();
+      if (!message || !agentManager) return;
+
+      document.getElementById('status').textContent = 'Sending...';
+      await agentManager.chat(message);
+      input.value = '';
     }
 
     window.addEventListener('DOMContentLoaded', () => {
-      initAgent();
-
+      createChatAndStart();
       document.getElementById('sendBtn').onclick = sendMessage;
     });
   </script>
 </head>
-<body>
-  <h1>Interactive D‑ID Agent</h1>
-  <video id="video" autoplay playsinline width="480" height="360"></video>
-  <div id="status">Initializing...</div>
-  <input id="input" type="text" placeholder="Say something to the agent" size="50"/>
-  <button id="sendBtn">Send</button>
+<body style="font-family: sans-serif; text-align: center; padding: 2rem; background: #121212; color: white;">
+  <h1>D-ID Agent Chat</h1>
+  <video id="video" autoplay playsinline width="480" height="360" style="border: 2px solid white; border-radius: 10px;"></video>
+  <p id="status">Initializing...</p>
+  <input id="input" type="text" placeholder="Say something..." style="padding: 0.5rem; width: 300px;"/>
+  <button id="sendBtn" style="padding: 0.5rem 1rem; margin-left: 0.5rem;">Send</button>
 </body>
 </html>
