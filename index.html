@@ -18,8 +18,8 @@
   <video id="agentVideo" autoplay playsinline></video>
 
   <script>
-    const apiKey = "ZXZhbmRlci5mb3h4QGRzaXRpcC5jb20:rAPO4vw9SfmtqivYRHhf4"; // Your API key
-    const agentId = "agt_Jd4BnTW4"; // Your Agent ID
+    const apiKey = "ZXZhbmRlci5mb3h4QGRzaXRpcC5jb20:rAPO4vw9SfmtqivYRHhf4";
+    const agentId = "agt_Jd4BnTW4";
 
     let ws;
     let pc;
@@ -32,12 +32,16 @@
           "Authorization": `Basic ${btoa(apiKey)}`,
           "Content-Type": "application/json"
         },
-        body: JSON.stringify({
-          agent_id: agentId
-        })
+        body: JSON.stringify({ agent_id: agentId })
       });
 
       const data = await response.json();
+
+      if (!data.offer || !data.offer.sdp) {
+        console.error("Invalid SDP offer from D-ID API:", data);
+        return;
+      }
+
       const { id, offer, ice_servers, ws_url } = data;
 
       // 1. Create PeerConnection
@@ -46,14 +50,14 @@
         videoElement.srcObject = event.streams[0];
       };
 
-      // 2. Set remote offer from server
-      await pc.setRemoteDescription({ type: "offer", sdp: offer });
+      // 2. Set remote offer (ONLY the SDP string)
+      await pc.setRemoteDescription({ type: "offer", sdp: offer.sdp });
 
       // 3. Create and set local answer
       const answer = await pc.createAnswer();
       await pc.setLocalDescription(answer);
 
-      // 4. Send answer back to D-ID
+      // 4. Send SDP answer back to D-ID
       await fetch(`https://api.d-id.com/talks/streams/${id}/sdp`, {
         method: "POST",
         headers: {
@@ -63,14 +67,10 @@
         body: JSON.stringify({ answer: pc.localDescription.sdp })
       });
 
-      // 5. Connect to WebSocket for interaction
+      // 5. WebSocket connection
       ws = new WebSocket(ws_url);
-      ws.onopen = () => {
-        console.log("WebSocket connected.");
-      };
-      ws.onmessage = (msg) => {
-        console.log("Message from D-ID agent:", msg.data);
-      };
+      ws.onopen = () => console.log("WebSocket connected");
+      ws.onmessage = (msg) => console.log("From D-ID:", msg.data);
     }
 
     function sendText() {
@@ -81,7 +81,7 @@
       }
     }
 
-    createStream(); // Start streaming when page loads
+    createStream(); // Start stream
   </script>
 </body>
 </html>
