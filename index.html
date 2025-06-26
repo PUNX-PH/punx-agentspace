@@ -2,12 +2,13 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>HeyGen Avatar with Transcript Fix</title>
+  <title>HeyGen with Transcript + AssemblyAI</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 text-gray-900 p-6">
-  <h1 class="text-2xl font-bold mb-4">HeyGen Interactive Avatar with Transcript</h1>
+  <h1 class="text-2xl font-bold mb-4">HeyGen Avatar + Voice Transcription</h1>
 
+  <!-- Transcript Section -->
   <div class="mt-6 bg-white p-4 rounded shadow-md">
     <h2 class="text-xl font-semibold mb-2">Transcript</h2>
     <div id="transcriptLog" class="space-y-1 text-sm max-h-64 overflow-y-auto"></div>
@@ -16,56 +17,110 @@
     </button>
   </div>
 
+  <!-- Recording Controls -->
+  <div class="mt-6">
+    <button onclick="startRecording()" class="mr-2 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">🎙️ Start Voice Recording</button>
+    <button onclick="stopRecordingAndTranscribe().then(showTranscription)" class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">🛑 Stop & Transcribe</button>
+  </div>
+
   <script>
     const transcript = [];
     const transcriptLog = document.getElementById('transcriptLog');
     const downloadBtn = document.getElementById('downloadBtn');
 
-    // 🚨 Add this AFTER HeyGen's script to make sure iframe exists
+    // Capture avatar & user messages
     window.addEventListener("message", (event) => {
       const allowedOrigin = "https://labs.heygen.com";
-
       if (event.origin !== allowedOrigin) return;
 
       const { type, data } = event.data || {};
 
-      if (type === "USER_TALKING_MESSAGE") {
-        logMessage("User", data?.text);
-      }
-
-      if (type === "AVATAR_TALKING_MESSAGE") {
-        logMessage("Avatar", data?.text);
-      }
+      if (type === "USER_TALKING_MESSAGE") logMessage("User", data?.text);
+      if (type === "AVATAR_TALKING_MESSAGE") logMessage("Avatar", data?.text);
     });
 
     function logMessage(speaker, text) {
       if (!text) return;
       const time = new Date().toISOString();
       transcript.push({ speaker, text, timestamp: time });
-
       const entry = document.createElement('div');
       entry.innerHTML = `<strong>${speaker}:</strong> ${text}`;
       transcriptLog.appendChild(entry);
     }
 
     downloadBtn.addEventListener("click", () => {
-      if (transcript.length === 0) {
-        alert("Transcript is empty.");
-        return;
-      }
+      if (transcript.length === 0) return alert("Transcript is empty.");
       const blob = new Blob([JSON.stringify(transcript, null, 2)], { type: "application/json" });
       const url = URL.createObjectURL(blob);
-
       const a = document.createElement("a");
       a.href = url;
       a.download = `heygen_transcript_${Date.now()}.json`;
       a.click();
-
       URL.revokeObjectURL(url);
     });
+
+    // 🎤 AssemblyAI Audio Recording & Upload
+    let mediaRecorder;
+    let audioChunks = [];
+
+    async function startRecording() {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      mediaRecorder = new MediaRecorder(stream);
+      mediaRecorder.ondataavailable = (event) => audioChunks.push(event.data);
+      mediaRecorder.start();
+      console.log("Recording started...");
+    }
+
+    async function stopRecordingAndTranscribe() {
+      return new Promise((resolve) => {
+        mediaRecorder.onstop = async () => {
+          const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+
+          const uploadRes = await fetch("https://api.assemblyai.com/v2/upload", {
+            method: "POST",
+            headers: { "authorization": "0b041869f4ba489b9cd9e305bac99464" },
+            body: audioBlob
+          });
+          const { upload_url } = await uploadRes.json();
+
+          const transcriptRes = await fetch("https://api.assemblyai.com/v2/transcript", {
+            method: "POST",
+            headers: {
+              "authorization": "0b041869f4ba489b9cd9e305bac99464",
+              "content-type": "application/json"
+            },
+            body: JSON.stringify({ audio_url: upload_url })
+          });
+          const { id } = await transcriptRes.json();
+
+          // Poll
+          let completed = false, text = "";
+          while (!completed) {
+            const polling = await fetch(`https://api.assemblyai.com/v2/transcript/${id}`, {
+              headers: { authorization: "0b041869f4ba489b9cd9e305bac99464" }
+            });
+            const data = await polling.json();
+            if (data.status === "completed") {
+              completed = true;
+              text = data.text;
+            } else if (data.status === "error") {
+              console.error("Transcription error:", data.error);
+              break;
+            }
+            await new Promise(r => setTimeout(r, 3000));
+          }
+          resolve(text);
+        };
+        mediaRecorder.stop();
+      });
+    }
+
+    function showTranscription(text) {
+      logMessage("Transcription (AssemblyAI)", text);
+    }
   </script>
 
-  <!-- Your provided HeyGen embed script -->
+  <!-- HeyGen Avatar Embed Code -->
   <script>
     !function(window){
       const host="https://labs.heygen.com",
