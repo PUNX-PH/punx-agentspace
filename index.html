@@ -1,219 +1,61 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <title>D-ID Streaming POC</title>
-    <!-- added google fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Mulish:wght@300;400;700&display=swap" rel="stylesheet" />
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>D‑ID Agent Live Chat</title>
+  <script type="module">
+    import * as sdk from 'https://cdn.jsdelivr.net/npm/@d-id/client-sdk/+esm';
 
-    <style>
-      .peerConnectionState-new {
-        color: cornflowerblue;
-      }
-      .peerConnectionState-connecting {
-        color: orange;
-      }
-      .peerConnectionState-connected {
-        color: green;
-      }
-      .peerConnectionState-disconnected,
-      .peerConnectionState-closed,
-      .peerConnectionState-failed {
-        color: red;
-      }
+    const agentId = 'YOUR_AGENT_ID';
+    const auth = { type: 'key', clientKey: 'YOUR_CLIENT_KEY' };
 
-      .iceConnectionState-new {
-        color: cornflowerblue;
+    const callbacks = {
+      onSrcObjectReady(value) {
+        video.srcObject = value;
+      },
+      onVideoStateChange(state) {
+        status.textContent = `Video state: ${state}`;
+      },
+      onError(err) {
+        console.error('Agent SDK error:', err);
+        status.textContent = `Error: ${err.message}`;
       }
-      .iceConnectionState-checking {
-        color: orange;
-      }
-      .iceConnectionState-connected,
-      .iceConnectionState-completed {
-        color: green;
-      }
-      .peerConnectionState-disconnected,
-      .peerConnectionState-closed,
-      .peerConnectionState-failed {
-        color: red;
-      }
+    };
 
-      .iceGatheringState-new {
-        color: cornflowerblue;
-      }
-      .iceGatheringState-gathering {
-        color: orange;
-      }
-      .iceGatheringState-complete {
-        color: black;
-      }
+    const streamOptions = { compatibilityMode: 'auto', streamWarmup: true };
 
-      .signalingState-stable {
-        color: green;
-      }
-      .signalingState-have-local-offer,
-      .signalingState-have-remote-offer,
-      .signalingState-have-local-pranswer,
-      .signalingState-have-remote-pranswer {
-        color: cornflowerblue;
-      }
-      .signalingState-closed {
-        color: red;
-      }
+    let agentManager;
 
-      .streamingState-streaming {
-        color: green;
-      }
+    async function initAgent() {
+      agentManager = await sdk.createAgentManager(agentId, {
+        auth,
+        callbacks,
+        streamOptions
+      });
+      await agentManager.connect();
+      status.textContent = 'Connected — ready to chat';
+    }
 
-      .streamingState-empty {
-        color: grey;
-      }
+    async function sendMessage() {
+      const text = input.value.trim();
+      if (!text) return;
+      status.textContent = 'Sending…';
+      await agentManager.chat(text);
+      status.textContent = 'Awaiting response…';
+    }
 
-      .streamEvent-started {
-        color: green;
-      }
+    window.addEventListener('DOMContentLoaded', () => {
+      initAgent();
 
-      .streamEvent-done {
-        color: orange;
-      }
-
-      .streamEvent-ready {
-        color: green;
-      }
-
-      .streamEvent-error {
-        color: red;
-      }
-
-      .streamEvent-dont-care {
-        color: gray;
-      }
-
-      /* added css from here */
-
-      body * {
-        font-family: 'Mulish', sans-serif;
-        text-align: center;
-      }
-
-      #content {
-        width: 820px;
-        position: relative;
-        margin: 0 auto;
-      }
-
-      .button-container {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 10px;
-      }
-
-      .button-row {
-        display: flex;
-        flex-direction: row;
-        justify-content: center;
-        gap: 10px;
-      }
-
-      button {
-        padding: 10px 20px;
-        border-radius: 5px;
-        border: none;
-        font-size: 16px;
-        margin: 0 5px;
-        background-color: #7459fe;
-        color: #fff;
-      }
-
-      button:hover {
-        background-color: #9480ff;
-        cursor: pointer;
-        transition: all 0.2s ease-out;
-      }
-
-      #status {
-        clear: both;
-        padding: 20px 0 0 0;
-        text-align: left;
-        display: inline-block;
-        zoom: 1;
-        line-height: 140%;
-        font-size: 15px;
-      }
-
-      #status div {
-        padding-bottom: 10px;
-      }
-
-      #video-wrapper {
-        background: url(bg.png);
-        height: 500px;
-        background-position: top;
-      }
-
-      #video-wrapper div {
-        position: relative;
-        height: 100%;
-        width: 400px;
-        margin: 0 auto;
-      }
-
-      video {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        /*border:1px solid;*/
-        border-radius: 50%;
-        background-color: #fff;
-
-        object-fit: cover;
-        background-size: cover;
-        background-repeat: no-repeat;
-        background-position: center;
-        background-image: url("alex_v2_idle_image.png");
-      }
-    </style>
-  </head>
-
-  <body>
-    <!-- adde "id=content" -->
-    <div id="content">
-      <!-- added "id=video-wrapper" -->
-      <div id="video-wrapper">
-        <div>
-          <video id="idle-video-element" width="400" height="400" autoplay loop style="opacity: 1"></video>
-          <video id="stream-video-element" width="400" height="400" autoplay style="opacity: 0"></video>
-        </div>
-      </div>
-      <br />
-
-      <!-- added div#buttons -->
-      <div class="button-container">
-        <div class="button-row">
-          <button id="connect-button" type="button">Connect</button>
-          <button id="destroy-button" type="button">Destroy</button>
-        </div>
-        <div class="button-row">
-          <button id="audio-button" type="button">Audio</button>
-          <button id="text-button" type="button">Text</button>
-        </div>
-      </div>
-
-      <!-- added div#status -->
-      <div id="status">
-        <!-- removed the wrapping <div> tags -->
-        ICE gathering status: <label id="ice-gathering-status-label"></label><br />
-        ICE status: <label id="ice-status-label"></label><br />
-        Peer connection status: <label id="peer-status-label"></label><br />
-        Signaling status: <label id="signaling-status-label"></label><br />
-        Last stream event: <label id="stream-event-label"></label><br />
-        Streaming status: <label id="streaming-status-label"></label><br />
-      </div>
-    </div>
-
-    <script type="module" src="./streaming-client-api.js"></script>
-  </body>
+      document.getElementById('sendBtn').onclick = sendMessage;
+    });
+  </script>
+</head>
+<body>
+  <h1>Interactive D‑ID Agent</h1>
+  <video id="video" autoplay playsinline width="480" height="360"></video>
+  <div id="status">Initializing...</div>
+  <input id="input" type="text" placeholder="Say something to the agent" size="50"/>
+  <button id="sendBtn">Send</button>
+</body>
 </html>
