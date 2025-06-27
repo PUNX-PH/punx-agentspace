@@ -69,6 +69,7 @@
       let webSocket = null;
       let sessionToken = null;
       let transcriptLog = [];
+      let keepAliveInterval = null;
 
       const statusElement = document.getElementById("status");
       const mediaElement = document.getElementById("mediaElement");
@@ -213,6 +214,7 @@ Neutral and detailed with a strategic tone. Uses analogies from real startups. A
 
         room.on(LivekitClient.RoomEvent.Disconnected, (reason) => {
           updateStatus(`Room disconnected: ${reason}`);
+          clearInterval(keepAliveInterval);
         });
 
         mediaStream = new MediaStream();
@@ -238,6 +240,14 @@ Neutral and detailed with a strategic tone. Uses analogies from real startups. A
         updateStatus("Connected to room");
         document.querySelector("#startBtn").disabled = true;
         updateStatus("Streaming started successfully");
+
+        // Start keep-alive ping every 60 seconds
+        keepAliveInterval = setInterval(() => {
+          if (sessionInfo) {
+            sendText("[keep alive]", "talk");
+            updateStatus("Sent keep-alive ping.");
+          }
+        }, 60 * 1000);
       }
 
       async function sendText(text, taskType = "talk") {
@@ -281,6 +291,9 @@ Neutral and detailed with a strategic tone. Uses analogies from real startups. A
         sessionToken = null;
         avatarBuffer = [];
         avatarSpeaking = false;
+
+        clearInterval(keepAliveInterval);
+        keepAliveInterval = null;
 
         document.querySelector("#startBtn").disabled = false;
         updateStatus("Session closed");
