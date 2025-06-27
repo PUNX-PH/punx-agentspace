@@ -241,16 +241,16 @@ Neutral and detailed with a strategic tone. Uses analogies from real startups. A
         document.querySelector("#startBtn").disabled = true;
         updateStatus("Streaming started successfully");
 
-        // Start keep-alive ping every 60 seconds
+        // Start silent keep-alive pings every 60 seconds
         keepAliveInterval = setInterval(() => {
           if (sessionInfo) {
-            sendText("[keep alive]", "talk");
-            updateStatus("Sent keep-alive ping.");
+            sendText("ping", "talk", true);
+            updateStatus("Sent silent keep-alive ping.");
           }
         }, 60 * 1000);
       }
 
-      async function sendText(text, taskType = "talk") {
+      async function sendText(text, taskType = "talk", silenceResponse = false) {
         if (!sessionInfo) return updateStatus("No active session");
 
         await fetch(`${API_CONFIG.serverUrl}/v1/streaming.task`, {
@@ -263,10 +263,11 @@ Neutral and detailed with a strategic tone. Uses analogies from real startups. A
             session_id: sessionInfo.session_id,
             text,
             task_type: taskType,
+            silence_response: silenceResponse
           }),
         });
 
-        updateStatus(`Sent text (${taskType}): ${text}`);
+        updateStatus(`Sent text (${taskType}${silenceResponse ? ", silent" : ""}): ${text}`);
       }
 
       async function closeSession() {
@@ -331,7 +332,7 @@ Neutral and detailed with a strategic tone. Uses analogies from real startups. A
             text,
             timestamp: new Date().toISOString(),
           });
-          sendText(text, "talk");
+          sendText(text, "talk", false);
           taskInput.value = "";
         }
       });
