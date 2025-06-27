@@ -11,13 +11,6 @@
   <body class="bg-gray-100 p-5 font-sans">
     <div class="max-w-3xl mx-auto bg-white p-5 rounded-lg shadow-md">
       <div class="flex flex-wrap gap-2.5 mb-5">
-        <input
-          id="avatarID"
-          type="text"
-          placeholder="Avatar ID"
-          value="Wayne_20240711"
-          class="flex-1 min-w-[200px] p-2 border border-gray-300 rounded-md"
-        />
         <button
           id="startBtn"
           class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
@@ -79,7 +72,6 @@
 
       const statusElement = document.getElementById("status");
       const mediaElement = document.getElementById("mediaElement");
-      const avatarID = document.getElementById("avatarID");
       const taskInput = document.getElementById("taskInput");
 
       function updateStatus(message) {
@@ -141,7 +133,7 @@
           },
           body: JSON.stringify({
             quality: "high",
-            avatar_name: avatarID.value,
+            avatar_name: "Dexter_Lawyer_Sitting_public",
             version: "v2",
             video_encoding: "H264",
             knowledge_base: `Specialty: Business Models, Monetization, Scalability, Operations
