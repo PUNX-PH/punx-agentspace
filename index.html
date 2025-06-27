@@ -106,6 +106,10 @@
         const wsUrl = `wss://${new URL(API_CONFIG.serverUrl).hostname}/v1/ws/streaming.chat?${params}`;
         webSocket = new WebSocket(wsUrl);
 
+        webSocket.addEventListener("open", () => {
+          updateStatus("WebSocket connected");
+        });
+
         webSocket.addEventListener("message", (event) => {
           const eventData = JSON.parse(event.data);
           console.log("WebSocket Event:", eventData);
@@ -117,6 +121,16 @@
               timestamp: new Date().toISOString(),
             });
           }
+        });
+
+        webSocket.addEventListener("close", () => {
+          updateStatus("WebSocket closed");
+          clearInterval(keepAliveInterval);
+        });
+
+        webSocket.addEventListener("error", (error) => {
+          console.error("WebSocket error:", error);
+          updateStatus("WebSocket error occurred");
         });
       }
 
@@ -241,16 +255,16 @@ Neutral and detailed with a strategic tone. Uses analogies from real startups. A
         document.querySelector("#startBtn").disabled = true;
         updateStatus("Streaming started successfully");
 
-        // Start silent keep-alive pings every 60 seconds
+        // Start WebSocket ping every 60 sec
         keepAliveInterval = setInterval(() => {
-          if (sessionInfo) {
-            sendText("ping", "talk", true);
-            updateStatus("Sent silent keep-alive ping.");
+          if (webSocket && webSocket.readyState === WebSocket.OPEN) {
+            webSocket.send(JSON.stringify({ type: "ping" }));
+            updateStatus("Sent WebSocket keep-alive ping");
           }
-        }, 60 * 1000);
+        }, 60000);
       }
 
-      async function sendText(text, taskType = "talk", silenceResponse = false) {
+      async function sendText(text, taskType = "talk") {
         if (!sessionInfo) return updateStatus("No active session");
 
         await fetch(`${API_CONFIG.serverUrl}/v1/streaming.task`, {
@@ -263,11 +277,10 @@ Neutral and detailed with a strategic tone. Uses analogies from real startups. A
             session_id: sessionInfo.session_id,
             text,
             task_type: taskType,
-            silence_response: silenceResponse
           }),
         });
 
-        updateStatus(`Sent text (${taskType}${silenceResponse ? ", silent" : ""}): ${text}`);
+        updateStatus(`Sent text (${taskType}): ${text}`);
       }
 
       async function closeSession() {
@@ -332,7 +345,7 @@ Neutral and detailed with a strategic tone. Uses analogies from real startups. A
             text,
             timestamp: new Date().toISOString(),
           });
-          sendText(text, "talk", false);
+          sendText(text, "talk");
           taskInput.value = "";
         }
       });
