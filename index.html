@@ -7,7 +7,6 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   </head>
-
   <body class="bg-gray-100 p-5 font-sans">
     <div class="max-w-3xl mx-auto bg-white p-5 rounded-lg shadow-md">
       <div class="flex flex-wrap gap-2.5 mb-5">
@@ -37,6 +36,12 @@
           class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors"
         >
           Send
+        </button>
+        <button
+          id="micBtn"
+          class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
+        >
+          🎤 Start Mic
         </button>
         <button
           id="downloadTranscriptBtn"
@@ -326,6 +331,64 @@ Neutral and detailed with a strategic tone. Uses analogies from real startups. A
       document
         .querySelector("#downloadTranscriptBtn")
         .addEventListener("click", downloadTranscript);
+
+      // Speech Recognition Integration
+      window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+      if (!window.SpeechRecognition) {
+        updateStatus("Speech Recognition is not supported in this browser.");
+      }
+
+      let recognition = null;
+      let recognizing = false;
+
+      if (window.SpeechRecognition) {
+        recognition = new window.SpeechRecognition();
+        recognition.lang = "en-US";
+        recognition.interimResults = false;
+        recognition.maxAlternatives = 1;
+
+        recognition.onstart = () => {
+          recognizing = true;
+          updateStatus("🎤 Microphone listening...");
+          document.querySelector("#micBtn").textContent = "🛑 Stop Mic";
+        };
+
+        recognition.onerror = (event) => {
+          updateStatus(`Microphone error: ${event.error}`);
+        };
+
+        recognition.onend = () => {
+          recognizing = false;
+          updateStatus("🎤 Microphone stopped.");
+          document.querySelector("#micBtn").textContent = "🎤 Start Mic";
+        };
+
+        recognition.onresult = (event) => {
+          const transcript = event.results[0][0].transcript.trim();
+          if (transcript) {
+            updateStatus(`You said: "${transcript}"`);
+            transcriptLog.push({
+              speaker: "user",
+              text: transcript,
+              timestamp: new Date().toISOString(),
+            });
+            sendText(transcript, "talk");
+          }
+        };
+      }
+
+      document.querySelector("#micBtn").addEventListener("click", () => {
+        if (!recognition) {
+          updateStatus("Speech Recognition not available.");
+          return;
+        }
+        if (recognizing) {
+          recognition.stop();
+        } else {
+          recognition.start();
+        }
+      });
     </script>
   </body>
 </html>
