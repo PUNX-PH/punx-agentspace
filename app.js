@@ -17,7 +17,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const startBtn = document.getElementById("startBtn");
   const talkBtn = document.getElementById("talkBtn");
   const downloadBtn = document.getElementById("downloadTranscriptBtn");
-  const endSessionBtn = document.getElementById("endSessionBtn");
+  const endSessionBtn = document.querySelector(".end-button");
 
   if (micBtn) micBtn.style.display = "none";
 
@@ -232,6 +232,29 @@ document.addEventListener("DOMContentLoaded", () => {
         sendText(transcript, "talk");
       }
     };
+
+    if (micBtn) {
+      micBtn.addEventListener("mousedown", () => {
+        if (!recognizing) {
+          recognition.start();
+          recognizing = true;
+        }
+      });
+
+      micBtn.addEventListener("mouseup", () => {
+        if (recognizing) {
+          recognition.stop();
+          recognizing = false;
+        }
+      });
+
+      micBtn.addEventListener("mouseleave", () => {
+        if (recognizing) {
+          recognition.stop();
+          recognizing = false;
+        }
+      });
+    }
   } else {
     if (micBtn) {
       micBtn.disabled = true;
@@ -239,20 +262,6 @@ document.addEventListener("DOMContentLoaded", () => {
       micBtn.classList.add("opacity-50", "cursor-not-allowed");
     }
   }
-
-  document.addEventListener("keydown", (event) => {
-    if (event.code === "Space" && !recognizing && recognition) {
-      event.preventDefault();
-      recognition.start();
-    }
-  });
-
-  document.addEventListener("keyup", (event) => {
-    if (event.code === "Space" && recognizing && recognition) {
-      event.preventDefault();
-      recognition.stop();
-    }
-  });
 
   // Event bindings
   if (startBtn) {
