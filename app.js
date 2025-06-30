@@ -14,6 +14,12 @@ document.addEventListener("DOMContentLoaded", () => {
   const mediaElement = document.getElementById("mediaElement");
   const taskInput = document.getElementById("taskInput");
   const micBtn = document.getElementById("micBtn");
+  const startBtn = document.getElementById("startBtn");
+  const talkBtn = document.getElementById("talkBtn");
+  const downloadBtn = document.getElementById("downloadTranscriptBtn");
+  const endSessionBtn = document.getElementById("endSessionBtn");
+
+  if (micBtn) micBtn.style.display = "none";
 
   async function getSessionToken() {
     const response = await fetch(`${API_CONFIG.serverUrl}/v1/streaming.create_token`, {
@@ -141,8 +147,9 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     await room.connect(sessionInfo.url, sessionInfo.access_token);
-    const startBtn = document.querySelector("#startBtn");
-    if (startBtn) startBtn.disabled = true;
+
+    if (startBtn) startBtn.style.display = "none";
+    if (micBtn) micBtn.style.display = "block";
   }
 
   async function sendText(text, taskType = "talk") {
@@ -185,8 +192,8 @@ document.addEventListener("DOMContentLoaded", () => {
     avatarBuffer = [];
     avatarSpeaking = false;
 
-    const startBtn = document.querySelector("#startBtn");
-    if (startBtn) startBtn.disabled = false;
+    if (startBtn) startBtn.style.display = "block";
+    if (micBtn) micBtn.style.display = "none";
   }
 
   function downloadTranscript() {
@@ -203,6 +210,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.body.removeChild(a);
   }
 
+  // Speech Recognition
   window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   let recognition = null;
   let recognizing = false;
@@ -238,6 +246,7 @@ document.addEventListener("DOMContentLoaded", () => {
       recognition.start();
     }
   });
+
   document.addEventListener("keyup", (event) => {
     if (event.code === "Space" && recognizing && recognition) {
       event.preventDefault();
@@ -246,18 +255,14 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // Event bindings
-  const startBtn = document.querySelector("#startBtn");
-  const talkBtn = document.querySelector("#talkBtn");
-  const downloadBtn = document.querySelector("#downloadTranscriptBtn");
-  const endSessionBtn = document.querySelector("#endSessionBtn");
-
-  if (startBtn)
+  if (startBtn) {
     startBtn.addEventListener("click", async () => {
       await createNewSession();
       await startStreamingSession();
     });
+  }
 
-  if (talkBtn)
+  if (talkBtn) {
     talkBtn.addEventListener("click", () => {
       const text = taskInput?.value.trim();
       if (text) {
@@ -266,6 +271,7 @@ document.addEventListener("DOMContentLoaded", () => {
         taskInput.value = "";
       }
     });
+  }
 
   if (downloadBtn) downloadBtn.addEventListener("click", downloadTranscript);
   if (endSessionBtn) endSessionBtn.addEventListener("click", closeSession);
