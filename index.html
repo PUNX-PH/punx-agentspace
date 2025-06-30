@@ -3,94 +3,122 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>HeyGen Streaming API LiveKit (V2)</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.jsdelivr.net/npm/livekit-client/dist/livekit-client.umd.min.js"></script>
+  <title>Shark Tank AI</title>
   <style>
     body {
-      background: linear-gradient(to bottom right, #1a1a1a, #0f0f0f);
-      color: #f0f0f0;
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: url('images/bg-main.jpg') no-repeat center center fixed;
+      background-size: cover;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
     }
-    .glass {
-      background: rgba(255, 255, 255, 0.05);
-      backdrop-filter: blur(8px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+
+    .container {
+      background-color: #0d0d25;
+      border-radius: 20px;
+      padding: 20px;
+      width: 360px;
+      color: white;
+      text-align: center;
+      position: relative;
     }
-    .btn-primary {
-      @apply px-4 py-2 rounded-lg font-semibold transition-colors;
-      background-color: #4ade80;
-      color: #111827;
+
+    .logo {
+      width: 140px;
+      margin: 0 auto 10px;
     }
-    .btn-primary:hover {
-      background-color: #22c55e;
+
+    .shark-tank-header {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
     }
-    .btn-secondary {
-      @apply px-4 py-2 rounded-lg font-semibold transition-colors;
-      background-color: #60a5fa;
-      color: #111827;
+
+    .shark-text {
+      width: 200px;
     }
-    .btn-secondary:hover {
-      background-color: #3b82f6;
+
+    .ai-box {
+      width: 40px;
     }
-    .btn-danger {
-      @apply px-4 py-2 rounded-lg font-semibold transition-colors;
-      background-color: #f87171;
-      color: #111827;
+
+    .timer {
+      font-size: 14px;
+      margin-bottom: 10px;
     }
-    .btn-danger:hover {
-      background-color: #ef4444;
+
+    .time-box {
+      display: inline-block;
+      background: #a020f0;
+      padding: 5px 10px;
+      border-radius: 10px;
+      font-weight: bold;
+      font-size: 16px;
+    }
+
+    .video-frame {
+      margin-top: 10px;
+      margin-bottom: 10px;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .video-frame img {
+      width: 100%;
+      display: block;
+    }
+
+    .name {
+      font-size: 18px;
+      font-weight: bold;
+      margin: 10px 0 5px;
+    }
+
+    .role {
+      font-size: 14px;
+      color: #ccc;
+      margin-bottom: 15px;
+    }
+
+    .end-button {
+      background: linear-gradient(to right, #a020f0, #d780f0);
+      border: none;
+      border-radius: 30px;
+      padding: 10px 20px;
+      color: white;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      outline: none;
     }
   </style>
 </head>
-<body class="min-h-screen flex items-center justify-center p-6">
-  <div class="w-full max-w-4xl space-y-6">
-    <!-- Header -->
-    <div class="flex items-center justify-between">
-      <h1 class="text-2xl font-bold text-green-400">🎤 HeyGen Streaming AI</h1>
-      <button id="downloadTranscriptBtn" class="btn-secondary">
-        ⬇️ Download Transcript
-      </button>
+<body>
+  <div class="container">
+    <img class="logo" src="images/logo-ignite.png" alt="Ignite Logo" />
+
+    <div class="shark-tank-header">
+      <img class="shark-text" src="images/shark-tank-text.png" alt="Shark Tank Text" />
+      <img class="ai-box" src="images/ai-box.png" alt="AI Label" />
     </div>
 
-    <!-- Video Player -->
-    <div class="glass rounded-xl overflow-hidden">
-      <video id="mediaElement" class="w-full h-64 object-cover" autoplay></video>
+    <div class="timer">
+      TIME LEFT <span class="time-box">9:50</span>
     </div>
 
-    <!-- Controls -->
-    <div class="glass rounded-xl p-4 flex flex-wrap gap-3">
-      <button id="startBtn" class="btn-primary flex-1">
-        ▶️ Start
-      </button>
-      <button id="closeBtn" class="btn-danger flex-1">
-        ⏹️ Close
-      </button>
-      <button id="micBtn" class="btn-secondary flex-1">
-        🎤 Hold Space to Talk
-      </button>
+    <div class="video-frame">
+      <img src="images/lexi-leap.png" alt="Lexi Leap Video Placeholder" />
     </div>
 
-    <!-- Input and Send -->
-    <div class="glass rounded-xl p-4 flex gap-3">
-      <input
-        id="taskInput"
-        type="text"
-        placeholder="Type something..."
-        class="flex-1 p-2 rounded-lg bg-gray-800 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-green-500"
-      />
-      <button id="talkBtn" class="btn-primary">
-        💬 Send
-      </button>
-    </div>
+    <div class="name">Lexi Leap</div>
+    <div class="role">The Innovation Futurist</div>
 
-    <!-- Transcript -->
-    <div
-      id="status"
-      class="glass rounded-xl p-4 h-40 overflow-y-auto font-mono text-sm"
-    ></div>
+    <button class="end-button">END SESSION</button>
   </div>
-
-  <!-- Logic -->
-  <script src="./app.js"></script>
 </body>
 </html>
