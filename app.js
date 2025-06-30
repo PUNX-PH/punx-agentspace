@@ -3,6 +3,11 @@ const API_CONFIG = {
   serverUrl: "https://api.heygen.com",
 };
 
+if (!window.livekitClient) {
+  alert("LiveKit client library failed to load. Please check your script tag.");
+  throw new Error("LiveKit client not available.");
+}
+
 let sessionInfo = null;
 let room = null;
 let mediaStream = null;
@@ -17,8 +22,10 @@ const micBtn = document.getElementById("micBtn");
 
 function updateStatus(message) {
   const timestamp = new Date().toLocaleTimeString();
-  statusElement.innerHTML += `[${timestamp}] ${message}<br>`;
-  statusElement.scrollTop = statusElement.scrollHeight;
+  if (statusElement) {
+    statusElement.innerHTML += `[${timestamp}] ${message}<br>`;
+    statusElement.scrollTop = statusElement.scrollHeight;
+  }
 }
 
 async function getSessionToken() {
@@ -48,8 +55,6 @@ async function connectWebSocket(sessionId) {
 
   webSocket.addEventListener("message", (event) => {
     const eventData = JSON.parse(event.data);
-    console.log("WebSocket Event:", eventData);
-
     if (eventData.type === "USER_TALKING_MESSAGE") {
       transcriptLog.push({
         speaker: "user",
@@ -98,7 +103,7 @@ Neutral and detailed with a strategic tone. Uses analogies from real startups. A
   const data = await response.json();
   sessionInfo = data.data;
 
- const LivekitClient = window.Livekit;
+  const LivekitClient = window.livekitClient;
 
   room = new LivekitClient.Room({
     adaptiveStream: true,
@@ -115,11 +120,9 @@ Neutral and detailed with a strategic tone. Uses analogies from real startups. A
       if (data.type === "avatar_start_talking") {
         avatarSpeaking = true;
         avatarBuffer = [];
-      }
-      if (data.type === "avatar_talking_message" && avatarSpeaking) {
+      } else if (data.type === "avatar_talking_message" && avatarSpeaking) {
         avatarBuffer.push(data.message);
-      }
-      if (data.type === "avatar_end_message" && avatarSpeaking) {
+      } else if (data.type === "avatar_end_message" && avatarSpeaking) {
         const fullMessage = avatarBuffer.join(" ").replace(/\s+/g, " ").trim();
         transcriptLog.push({
           speaker: "avatar",
@@ -242,7 +245,6 @@ function downloadTranscript() {
   updateStatus("Transcript JSON downloaded.");
 }
 
-// Speech Recognition
 window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 let recognition = null;
 let recognizing = false;
@@ -279,7 +281,7 @@ if (window.SpeechRecognition) {
       sendText(transcript, "talk");
     }
   };
-} else {
+} else if (micBtn) {
   micBtn.disabled = true;
   micBtn.textContent = "🎤 Not Supported";
   micBtn.classList.add("opacity-50", "cursor-not-allowed");
@@ -299,7 +301,6 @@ document.addEventListener("keyup", (event) => {
   }
 });
 
-// UI Binds
 const talkBtn = document.querySelector("#talkBtn");
 if (talkBtn)
   talkBtn.addEventListener("click", () => {
@@ -321,7 +322,6 @@ if (endSessionBtn)
     updateStatus("🔴 Session ended by user.");
   });
 
-// Auto Start on Load
 (async () => {
   const LivekitClient = window.livekitClient;
   await createNewSession();
