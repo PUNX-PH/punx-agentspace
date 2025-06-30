@@ -4,26 +4,32 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Shark Tank AI</title>
+  <script src="https://cdn.tailwindcss.com"></script>
   <style>
     body {
       margin: 0;
       font-family: Arial, sans-serif;
-      background: url('images/bg-main.jpg') no-repeat center center fixed;
+      background: url('images/bg-main.png') no-repeat center center fixed;
       background-size: cover;
       display: flex;
-      justify-content: center;
+      flex-direction: column;
       align-items: center;
-      height: 100vh;
+      justify-content: flex-start;
+      min-height: 100vh;
+      padding: 20px;
     }
 
     .container {
       background-color: #0d0d25;
       border-radius: 20px;
-      padding: 20px;
-      width: 360px;
+      padding: 24px 20px;
+      width: 100%;
+      max-width: 400px;
       color: white;
       text-align: center;
-      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
     }
 
     .logo {
@@ -43,10 +49,6 @@
       width: 200px;
     }
 
-    .ai-box {
-      width: 40px;
-    }
-
     .timer {
       font-size: 14px;
       margin-bottom: 10px;
@@ -62,15 +64,11 @@
     }
 
     .video-frame {
-      margin-top: 10px;
-      margin-bottom: 10px;
+      margin: 15px 0;
       border-radius: 10px;
       overflow: hidden;
-    }
-
-    .video-frame img {
       width: 100%;
-      display: block;
+      height: auto;
     }
 
     .name {
@@ -82,19 +80,91 @@
     .role {
       font-size: 14px;
       color: #ccc;
-      margin-bottom: 15px;
+      margin-bottom: 10px;
     }
 
     .end-button {
-      background: linear-gradient(to right, #a020f0, #d780f0);
+      margin-top: 20px;
+      background: none;
       border: none;
-      border-radius: 30px;
-      padding: 10px 20px;
-      color: white;
-      font-size: 16px;
-      font-weight: bold;
+      padding: 0;
       cursor: pointer;
-      outline: none;
+    }
+
+    .end-button img {
+      width: 100%;
+      max-width: 240px;
+    }
+
+    /* Button styling copied from old HTML */
+    .btn {
+      @apply px-4 py-2 rounded-lg font-semibold transition-colors w-full mb-2;
+      display: block;
+    }
+
+    .btn-primary {
+      background-color: #4ade80;
+      color: #111827;
+    }
+
+    .btn-primary:hover {
+      background-color: #22c55e;
+    }
+
+    .btn-secondary {
+      background-color: #60a5fa;
+      color: #111827;
+    }
+
+    .btn-secondary:hover {
+      background-color: #3b82f6;
+    }
+
+    .btn-danger {
+      background-color: #f87171;
+      color: #111827;
+    }
+
+    .btn-danger:hover {
+      background-color: #ef4444;
+    }
+
+    .controls, .input-area {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 12px;
+      margin-top: 12px;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 8px;
+      border-radius: 8px;
+      background: #1f2937;
+      color: white;
+      border: 1px solid #374151;
+      margin-bottom: 8px;
+    }
+
+    /* Responsive */
+    @media (max-width: 480px) {
+      .container {
+        padding: 20px 16px;
+      }
+
+      .shark-text {
+        width: 160px;
+      }
+
+      .logo {
+        width: 120px;
+      }
+
+      .end-button img {
+        max-width: 200px;
+      }
     }
   </style>
 </head>
@@ -104,21 +174,41 @@
 
     <div class="shark-tank-header">
       <img class="shark-text" src="images/shark-tank-text.png" alt="Shark Tank Text" />
-      <img class="ai-box" src="images/ai-box.png" alt="AI Label" />
     </div>
 
     <div class="timer">
       TIME LEFT <span class="time-box">9:50</span>
     </div>
 
+    <!-- Heygen video player here -->
     <div class="video-frame">
-      <img src="images/lexi-leap.png" alt="Lexi Leap Video Placeholder" />
+      <div id="heygen-player" style="width: 100%; height: 220px; background-color: black;">
+        <!-- Heygen iframe or SDK video player should be loaded here -->
+      </div>
     </div>
 
     <div class="name">Lexi Leap</div>
     <div class="role">The Innovation Futurist</div>
 
-    <button class="end-button">END SESSION</button>
+    <!-- Buttons Section (Old HTML Controls) -->
+    <div class="controls">
+      <button id="startBtn" class="btn btn-primary">▶️ Start</button>
+      <button id="closeBtn" class="btn btn-danger">⏹️ Close</button>
+      <button id="micBtn" class="btn btn-secondary">🎤 Hold Space to Talk</button>
+    </div>
+
+    <div class="input-area">
+      <input type="text" id="taskInput" placeholder="Type something..." />
+      <button id="talkBtn" class="btn btn-primary">💬 Send</button>
+    </div>
   </div>
+
+  <!-- End Button Outside -->
+  <button class="end-button">
+    <img src="images/end-session-btn.png" alt="End Session Button" />
+  </button>
+
+  <!-- JS script placeholder -->
+  <script src="./app.js"></script>
 </body>
 </html>
