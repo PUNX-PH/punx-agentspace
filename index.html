@@ -1,60 +1,71 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>Ignite Shark Tank AI</title>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HeyGen Streaming - Shark Tank AI</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- LiveKit library -->
-  <script src="https://cdn.jsdelivr.net/npm/livekit-client/dist/livekit-client.umd.min.js"></script>
-  <!-- Your backend logic -->
-  <script defer src="backend.js"></script>
 </head>
-<body class="bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 min-h-screen flex items-center justify-center p-4">
-  <div class="max-w-3xl w-full bg-gray-950 rounded-2xl shadow-2xl border border-gray-800 overflow-hidden text-white relative">
-    <!-- Header -->
-    <div class="flex items-center justify-between px-6 py-4 border-b border-gray-800">
-      <div class="flex items-center gap-2">
-        <span class="text-xl font-bold text-purple-400">🔥 Ignite</span>
-        <span class="text-2xl font-extrabold">SHARK TANK</span>
-        <span class="bg-purple-600 text-white text-xs font-semibold px-2 py-1 rounded ml-2">AI</span>
-      </div>
-      <div class="flex items-center gap-2">
-        <span class="text-sm">TIME LEFT</span>
-        <span id="timeLeft" class="bg-purple-600 text-white font-bold px-3 py-1 rounded">10:00</span>
-      </div>
+<body class="bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 min-h-screen p-6 font-sans text-white">
+  <div class="max-w-3xl mx-auto bg-gray-800 p-6 rounded-xl shadow-2xl relative">
+
+    <!-- Timer Badge -->
+    <div class="absolute top-4 right-4 bg-purple-600 text-white px-3 py-1 rounded-full text-sm font-medium">
+      Time Left: <span id="timeLeft">10:00</span>
+    </div>
+
+    <!-- Title -->
+    <div class="text-center mb-6">
+      <h1 class="text-3xl font-extrabold tracking-wide mb-2">🔥 Ignite - Shark Tank AI</h1>
+      <p class="text-purple-300 font-medium">Pitch your ideas live with the avatar</p>
     </div>
 
     <!-- Video -->
-    <div class="w-full relative">
-      <video id="mediaElement" class="w-full max-h-[400px] object-cover bg-black" autoplay muted></video>
-      <div class="absolute bottom-2 left-2 flex items-center gap-2">
-        <button id="muteBtn" class="bg-red-600 hover:bg-red-700 px-3 py-1 text-xs rounded">Mute</button>
-        <button id="endChatBtn" class="bg-red-600 hover:bg-red-700 px-3 py-1 text-xs rounded">End Chat</button>
-      </div>
+    <video id="mediaElement" class="w-full rounded-lg border-4 border-purple-600 mb-4" autoplay></video>
+
+    <!-- Presenter Info -->
+    <div class="text-center mb-6">
+      <h2 id="presenterName" class="text-xl font-bold">Lexi Leap</h2>
+      <p class="text-purple-400">The Innovation Futurist</p>
+    </div>
+
+    <!-- Controls -->
+    <div class="flex flex-wrap gap-2 mb-4 justify-center">
+      <input id="avatarID" type="text" placeholder="Avatar ID"
+        value="Wayne_20240711"
+        class="flex-1 min-w-[180px] p-2 border border-gray-600 rounded-md bg-gray-700 placeholder-gray-400 text-white" />
+      <button id="startBtn"
+        class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition">Start</button>
+      <button id="closeBtn"
+        class="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition">Close</button>
+    </div>
+
+    <div class="flex flex-wrap gap-2 mb-4 justify-center">
+      <input id="taskInput" type="text" placeholder="Enter text for avatar to speak"
+        class="flex-1 min-w-[180px] p-2 border border-gray-600 rounded-md bg-gray-700 placeholder-gray-400 text-white" />
+      <button id="talkBtn"
+        class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition">Send</button>
+      <button id="downloadTranscriptBtn"
+        class="px-4 py-2 bg-purple-500 text-white rounded-md hover:bg-purple-600 transition">Download Transcript</button>
+      <button id="muteMicBtn"
+        class="px-4 py-2 bg-yellow-500 text-black rounded-md hover:bg-yellow-600 transition">Mute Mic</button>
+      <button id="endChatBtn"
+        class="px-4 py-2 bg-pink-500 text-white rounded-md hover:bg-pink-600 transition">End Chat</button>
     </div>
 
     <!-- Status -->
-    <div id="status" class="px-6 py-3 h-[100px] overflow-y-auto text-xs font-mono bg-gray-900 border-t border-b border-gray-800"></div>
+    <div id="status"
+      class="p-3 bg-gray-700 border border-gray-600 rounded-md h-[120px] overflow-y-auto font-mono text-sm"></div>
 
-    <!-- Controls -->
-    <div class="px-6 py-4 flex flex-col md:flex-row gap-3">
-      <input id="taskInput" type="text" placeholder="Let's chat..." class="flex-1 bg-gray-800 border border-gray-700 px-3 py-2 rounded placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-600" />
-      <button id="talkBtn" class="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded font-semibold">Send</button>
-      <button id="downloadTranscriptBtn" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded font-semibold">Download Transcript</button>
-      <button id="endSessionBtn" class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded font-semibold">End Session</button>
-    </div>
-
-    <!-- Footer -->
-    <div class="px-6 py-4 border-t border-gray-800 flex flex-col md:flex-row justify-between items-center gap-2">
-      <div class="text-sm">
-        <strong>Lexi Leap</strong> <span class="text-purple-400">— The Innovation Futurist</span>
-      </div>
-      <div class="flex gap-2">
-        <button id="startBtn" class="bg-green-600 hover:bg-green-700 px-4 py-2 rounded font-semibold">Start</button>
-        <button id="closeBtn" class="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded font-semibold">Close</button>
-      </div>
+    <!-- End Session -->
+    <div class="mt-6 text-center">
+      <button id="endSessionBtn"
+        class="px-6 py-3 bg-purple-600 text-white rounded-full font-semibold text-lg hover:bg-purple-700 transition">
+        END SESSION
+      </button>
     </div>
   </div>
+
+  <script src="app.js"></script>
 </body>
 </html>

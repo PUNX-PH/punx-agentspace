@@ -9,26 +9,11 @@ let mediaStream = null;
 let webSocket = null;
 let sessionToken = null;
 let transcriptLog = [];
-let countdown = 600;
 
-// Elements
 const statusElement = document.getElementById("status");
 const mediaElement = document.getElementById("mediaElement");
+const avatarID = document.getElementById("avatarID");
 const taskInput = document.getElementById("taskInput");
-const timeLeft = document.getElementById("timeLeft");
-
-// Countdown timer
-const timer = setInterval(() => {
-  if (countdown <= 0) {
-    clearInterval(timer);
-    timeLeft.textContent = "0:00";
-  } else {
-    countdown--;
-    const min = Math.floor(countdown / 60);
-    const sec = countdown % 60;
-    timeLeft.textContent = `${min}:${sec.toString().padStart(2, "0")}`;
-  }
-}, 1000);
 
 function updateStatus(message) {
   const timestamp = new Date().toLocaleTimeString();
@@ -46,7 +31,7 @@ async function getSessionToken() {
   });
   const data = await response.json();
   sessionToken = data.data.token;
-  updateStatus("Session token obtained.");
+  updateStatus("Session token obtained");
 }
 
 async function createNewSession() {
@@ -60,7 +45,7 @@ async function createNewSession() {
     },
     body: JSON.stringify({
       quality: "high",
-      avatar_name: "Wayne_20240711",
+      avatar_name: avatarID.value,
       version: "v2",
       video_encoding: "H264",
     }),
@@ -68,7 +53,10 @@ async function createNewSession() {
 
   const data = await response.json();
   sessionInfo = data.data;
-  updateStatus("Session created.");
+
+  mediaStream = new MediaStream();
+
+  updateStatus("Session created successfully");
 }
 
 async function startStreamingSession() {
@@ -81,11 +69,11 @@ async function startStreamingSession() {
     body: JSON.stringify({ session_id: sessionInfo.session_id }),
   });
 
-  updateStatus("Streaming started.");
+  updateStatus("Streaming started");
 }
 
-async function sendText(text) {
-  if (!sessionInfo) return updateStatus("No active session.");
+async function sendText(text, taskType = "talk") {
+  if (!sessionInfo) return updateStatus("No active session");
 
   await fetch(`${API_CONFIG.serverUrl}/v1/streaming.task`, {
     method: "POST",
@@ -96,15 +84,15 @@ async function sendText(text) {
     body: JSON.stringify({
       session_id: sessionInfo.session_id,
       text,
-      task_type: "talk",
+      task_type: taskType,
     }),
   });
 
-  updateStatus(`Sent: ${text}`);
+  updateStatus(`Sent text (${taskType}): ${text}`);
 }
 
 async function closeSession() {
-  if (!sessionInfo) return updateStatus("No active session.");
+  if (!sessionInfo) return updateStatus("No active session");
 
   await fetch(`${API_CONFIG.serverUrl}/v1/streaming.stop`, {
     method: "POST",
@@ -115,29 +103,45 @@ async function closeSession() {
     body: JSON.stringify({ session_id: sessionInfo.session_id }),
   });
 
+  if (webSocket) webSocket.close();
+  mediaElement.srcObject = null;
+
   sessionInfo = null;
+  room = null;
+  mediaStream = null;
   sessionToken = null;
-  updateStatus("Session closed.");
+
+  updateStatus("Session closed");
 }
 
 function downloadTranscript() {
   if (!transcriptLog.length) return updateStatus("Transcript is empty.");
 
-  const blob = new Blob([JSON.stringify(transcriptLog, null, 2)], {
-    type: "application/json",
-  });
+  const blob = new Blob([JSON.stringify(transcriptLog, null, 2)], { type: "application/json" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = "transcript.json";
+  a.download = `transcript_${sessionInfo?.session_id || "session"}.json`;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
 
-  updateStatus("Transcript downloaded.");
+  updateStatus("Transcript downloaded");
 }
 
-// Event bindings
+// Timer countdown
+let secondsLeft = 600;
+const timerSpan = document.getElementById('timeLeft');
+setInterval(() => {
+  if (secondsLeft > 0) {
+    secondsLeft--;
+    const min = String(Math.floor(secondsLeft / 60)).padStart(2, '0');
+    const sec = String(secondsLeft % 60).padStart(2, '0');
+    timerSpan.textContent = `${min}:${sec}`;
+  }
+}, 1000);
+
+// Button event handlers
 document.getElementById("startBtn").addEventListener("click", async () => {
   await createNewSession();
   await startStreamingSession();
@@ -148,12 +152,8 @@ document.getElementById("closeBtn").addEventListener("click", closeSession);
 document.getElementById("talkBtn").addEventListener("click", () => {
   const text = taskInput.value.trim();
   if (text) {
-    transcriptLog.push({
-      speaker: "user",
-      text,
-      timestamp: new Date().toISOString(),
-    });
-    sendText(text);
+    transcriptLog.push({ speaker: "user", text, timestamp: new Date().toISOString() });
+    sendText(text, "talk");
     taskInput.value = "";
   }
 });
@@ -162,11 +162,10 @@ document.getElementById("downloadTranscriptBtn").addEventListener("click", downl
 
 document.getElementById("endSessionBtn").addEventListener("click", closeSession);
 
-document.getElementById("muteBtn").addEventListener("click", () => {
-  mediaElement.muted = !mediaElement.muted;
-  updateStatus(mediaElement.muted ? "Muted." : "Unmuted.");
+document.getElementById("muteMicBtn").addEventListener("click", () => {
+  alert("Microphone muted/unmuted (implement logic)");
 });
 
 document.getElementById("endChatBtn").addEventListener("click", () => {
-  updateStatus("Chat ended.");
+  alert("Chat ended (implement logic)");
 });
