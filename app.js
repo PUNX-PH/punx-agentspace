@@ -11,22 +11,9 @@ document.addEventListener("DOMContentLoaded", () => {
   let sessionToken = null;
   let transcriptLog = [];
 
-  const statusElement = document.getElementById("status");
   const mediaElement = document.getElementById("mediaElement");
   const taskInput = document.getElementById("taskInput");
   const micBtn = document.getElementById("micBtn");
-
-  if (!statusElement) console.warn("Missing element: #status");
-  if (!mediaElement) console.warn("Missing element: #mediaElement");
-  if (!taskInput) console.warn("Missing element: #taskInput");
-  if (!micBtn) console.warn("Missing element: #micBtn");
-
-  function updateStatus(message) {
-    if (!statusElement) return;
-    const timestamp = new Date().toLocaleTimeString();
-    statusElement.innerHTML += `[${timestamp}] ${message}<br>`;
-    statusElement.scrollTop = statusElement.scrollHeight;
-  }
 
   async function getSessionToken() {
     const response = await fetch(`${API_CONFIG.serverUrl}/v1/streaming.create_token`, {
@@ -38,7 +25,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
     const data = await response.json();
     sessionToken = data.data.token;
-    updateStatus("Session token obtained");
   }
 
   async function connectWebSocket(sessionId) {
@@ -118,9 +104,7 @@ document.addEventListener("DOMContentLoaded", () => {
           avatarBuffer = [];
           avatarSpeaking = false;
         }
-      } catch (e) {
-        console.warn("Invalid JSON message:", dataStr);
-      }
+      } catch (e) {}
     });
 
     room.on(LivekitClient.RoomEvent.TrackSubscribed, (track) => {
@@ -132,7 +116,6 @@ document.addEventListener("DOMContentLoaded", () => {
           mediaStream.getAudioTracks().length > 0
         ) {
           mediaElement.srcObject = mediaStream;
-          updateStatus("Media stream ready");
         }
       }
     });
@@ -142,17 +125,9 @@ document.addEventListener("DOMContentLoaded", () => {
       if (mediaTrack) mediaStream.removeTrack(mediaTrack);
     });
 
-    room.on(LivekitClient.RoomEvent.Disconnected, (reason) => {
-      updateStatus(`Room disconnected: ${reason}`);
-    });
-
     mediaStream = new MediaStream();
-
     await room.prepareConnection(sessionInfo.url, sessionInfo.access_token);
-    updateStatus("Connection prepared");
-
     await connectWebSocket(sessionInfo.session_id);
-    updateStatus("Session created successfully");
   }
 
   async function startStreamingSession() {
@@ -166,14 +141,12 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     await room.connect(sessionInfo.url, sessionInfo.access_token);
-    updateStatus("Connected to room");
     const startBtn = document.querySelector("#startBtn");
     if (startBtn) startBtn.disabled = true;
-    updateStatus("Streaming started successfully");
   }
 
   async function sendText(text, taskType = "talk") {
-    if (!sessionInfo) return updateStatus("No active session");
+    if (!sessionInfo) return;
 
     await fetch(`${API_CONFIG.serverUrl}/v1/streaming.task`, {
       method: "POST",
@@ -187,12 +160,10 @@ document.addEventListener("DOMContentLoaded", () => {
         task_type: taskType,
       }),
     });
-
-    updateStatus(`Sent text (${taskType}): ${text}`);
   }
 
   async function closeSession() {
-    if (!sessionInfo) return updateStatus("No active session");
+    if (!sessionInfo) return;
 
     await fetch(`${API_CONFIG.serverUrl}/v1/streaming.stop`, {
       method: "POST",
@@ -216,13 +187,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const startBtn = document.querySelector("#startBtn");
     if (startBtn) startBtn.disabled = false;
-
-    updateStatus("Session closed");
   }
 
   function downloadTranscript() {
-    if (!transcriptLog.length) return updateStatus("Transcript is empty.");
-
+    if (!transcriptLog.length) return;
     const blob = new Blob([JSON.stringify(transcriptLog, null, 2)], {
       type: "application/json",
     });
@@ -233,11 +201,8 @@ document.addEventListener("DOMContentLoaded", () => {
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
-
-    updateStatus("Transcript JSON downloaded.");
   }
 
-  // Speech Recognition for Hold Space to Talk
   window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   let recognition = null;
   let recognizing = false;
@@ -248,24 +213,9 @@ document.addEventListener("DOMContentLoaded", () => {
     recognition.interimResults = false;
     recognition.maxAlternatives = 1;
 
-    recognition.onstart = () => {
-      recognizing = true;
-      updateStatus("🎤 Microphone listening...");
-    };
-
-    recognition.onerror = (event) => {
-      updateStatus(`Microphone error: ${event.error}`);
-    };
-
-    recognition.onend = () => {
-      recognizing = false;
-      updateStatus("🎤 Microphone stopped.");
-    };
-
     recognition.onresult = (event) => {
       const transcript = event.results[0][0].transcript.trim();
       if (transcript) {
-        updateStatus(`You said: "${transcript}"`);
         transcriptLog.push({
           speaker: "user",
           text: transcript,
@@ -297,17 +247,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Event bindings
   const startBtn = document.querySelector("#startBtn");
-  const closeBtn = document.querySelector("#closeBtn");
   const talkBtn = document.querySelector("#talkBtn");
   const downloadBtn = document.querySelector("#downloadTranscriptBtn");
+  const endSessionBtn = document.querySelector("#endSessionBtn");
 
   if (startBtn)
     startBtn.addEventListener("click", async () => {
       await createNewSession();
       await startStreamingSession();
     });
-
-  if (closeBtn) closeBtn.addEventListener("click", closeSession);
 
   if (talkBtn)
     talkBtn.addEventListener("click", () => {
@@ -320,4 +268,5 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
   if (downloadBtn) downloadBtn.addEventListener("click", downloadTranscript);
+  if (endSessionBtn) endSessionBtn.addEventListener("click", closeSession);
 });

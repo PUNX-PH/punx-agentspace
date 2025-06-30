@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Shark Tank AI</title>
 
-  <!-- Tailwind CSS (optional) -->
+  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
 
   <!-- LiveKit Client UMD -->
@@ -125,15 +125,6 @@
       background-color: #3b82f6;
     }
 
-    .btn-danger {
-      background-color: #f87171;
-      color: #111827;
-    }
-
-    .btn-danger:hover {
-      background-color: #ef4444;
-    }
-
     .input-area {
       display: flex;
       gap: 10px;
@@ -188,16 +179,16 @@
       <img class="shark-text" src="images/shark-tank-text.png" alt="Shark Tank Text" />
     </div>
     <div class="timer">TIME LEFT <span class="time-box">9:50</span></div>
+
     <div class="video-frame">
-      <!-- ✅ AUDIO ENABLED: muted removed -->
       <video id="mediaElement" autoplay playsinline></video>
     </div>
+
     <div class="name">Lexi Leap</div>
     <div class="role">The Innovation Futurist</div>
 
     <div class="controls">
       <button id="startBtn" class="btn-primary">▶️ Start</button>
-      <button id="closeBtn" class="btn-danger">⏹️ Close</button>
       <button id="micBtn" class="btn-secondary">🎤 Hold Space to Talk</button>
       <button id="downloadTranscriptBtn" class="btn-secondary">⬇️ Download Transcript</button>
     </div>
@@ -206,11 +197,10 @@
       <input id="taskInput" type="text" placeholder="Type something..." />
       <button id="talkBtn" class="btn-primary">💬 Send</button>
     </div>
-
-    <div id="status" class="controls font-mono text-sm h-32 overflow-y-auto mt-3"></div>
   </div>
 
-  <button class="end-button">
+  <!-- ✅ Updated with ID for JS binding -->
+  <button id="endSessionBtn" class="end-button">
     <img src="images/end-session-btn.png" alt="End Session Button" />
   </button>
 
@@ -218,3 +208,4 @@
   <script defer src="app.js"></script>
 </body>
 </html>
+ 
