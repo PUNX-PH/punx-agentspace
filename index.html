@@ -125,6 +125,15 @@
       background-color: #3b82f6;
     }
 
+    .btn-danger {
+      background-color: #f87171;
+      color: #111827;
+    }
+
+    .btn-danger:hover {
+      background-color: #ef4444;
+    }
+
     .input-area {
       display: flex;
       gap: 10px;
@@ -178,29 +187,26 @@
     <div class="shark-tank-header">
       <img class="shark-text" src="images/shark-tank-text.png" alt="Shark Tank Text" />
     </div>
-    <div class="timer">TIME LEFT <span class="time-box">9:50</span></div>
-
+    <div class="timer">TIME LEFT <span class="time-box">10:00</span></div>
     <div class="video-frame">
       <video id="mediaElement" autoplay playsinline></video>
     </div>
-
     <div class="name">Lexi Leap</div>
     <div class="role">The Innovation Futurist</div>
 
     <div class="controls">
       <button id="startBtn" class="btn-primary">▶️ Start</button>
-      <button id="micBtn" class="btn-secondary">🎤 Hold Space to Talk</button>
+      <button id="micBtn" class="btn-secondary" style="display: none;">🎤 Hold Space to Talk</button>
       <button id="downloadTranscriptBtn" class="btn-secondary">⬇️ Download Transcript</button>
     </div>
 
-    <div class="input-area">
+    <div class="input-area" style="display: none;">
       <input id="taskInput" type="text" placeholder="Type something..." />
       <button id="talkBtn" class="btn-primary">💬 Send</button>
     </div>
   </div>
 
-  <!-- ✅ Updated with ID for JS binding -->
-  <button id="endSessionBtn" class="end-button">
+  <button class="end-button">
     <img src="images/end-session-btn.png" alt="End Session Button" />
   </button>
 
@@ -208,4 +214,3 @@
   <script defer src="app.js"></script>
 </body>
 </html>
- 
