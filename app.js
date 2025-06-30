@@ -18,8 +18,19 @@ document.addEventListener("DOMContentLoaded", () => {
   const talkBtn = document.getElementById("talkBtn");
   const downloadBtn = document.getElementById("downloadTranscriptBtn");
   const endSessionBtn = document.querySelector(".end-button");
+  const inputArea = document.querySelector(".input-area");
+
+  // Create toggle button
+  const toggleBtn = document.createElement("button");
+  toggleBtn.textContent = "Switch to Chat";
+  toggleBtn.className = "btn-secondary mt-2";
+  toggleBtn.style.display = "none";
+  if (startBtn && startBtn.parentNode) startBtn.parentNode.insertBefore(toggleBtn, startBtn.nextSibling);
+
+  let mode = "voice"; // default mode is voice
 
   if (micBtn) micBtn.style.display = "none";
+  if (inputArea) inputArea.style.display = "none";
 
   async function getSessionToken() {
     const response = await fetch(`${API_CONFIG.serverUrl}/v1/streaming.create_token`, {
@@ -149,7 +160,9 @@ document.addEventListener("DOMContentLoaded", () => {
     await room.connect(sessionInfo.url, sessionInfo.access_token);
 
     if (startBtn) startBtn.style.display = "none";
+    if (toggleBtn) toggleBtn.style.display = "block";
     if (micBtn) micBtn.style.display = "block";
+    if (inputArea) inputArea.style.display = "none";
   }
 
   async function sendText(text, taskType = "talk") {
@@ -194,6 +207,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (startBtn) startBtn.style.display = "block";
     if (micBtn) micBtn.style.display = "none";
+    if (inputArea) inputArea.style.display = "none";
+    if (toggleBtn) toggleBtn.style.display = "none";
   }
 
   function downloadTranscript() {
@@ -243,13 +258,13 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     document.addEventListener("keydown", (event) => {
-      if (event.code === "Space" && !recognizing && recognition) {
+      if (event.code === "Space" && !recognizing && recognition && mode === "voice") {
         event.preventDefault();
         recognition.start();
       }
     });
     document.addEventListener("keyup", (event) => {
-      if (event.code === "Space" && recognizing && recognition) {
+      if (event.code === "Space" && recognizing && recognition && mode === "voice") {
         event.preventDefault();
         recognition.stop();
       }
@@ -261,6 +276,20 @@ document.addEventListener("DOMContentLoaded", () => {
       micBtn.classList.add("opacity-50", "cursor-not-allowed");
     }
   }
+
+  toggleBtn.addEventListener("click", () => {
+    if (mode === "voice") {
+      mode = "chat";
+      if (micBtn) micBtn.style.display = "none";
+      if (inputArea) inputArea.style.display = "flex";
+      toggleBtn.textContent = "Switch to Voice";
+    } else {
+      mode = "voice";
+      if (micBtn) micBtn.style.display = "block";
+      if (inputArea) inputArea.style.display = "none";
+      toggleBtn.textContent = "Switch to Chat";
+    }
+  });
 
   if (startBtn) {
     startBtn.addEventListener("click", async () => {
