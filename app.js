@@ -210,7 +210,6 @@ document.addEventListener("DOMContentLoaded", () => {
     document.body.removeChild(a);
   }
 
-  // Speech Recognition
   window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   let recognition = null;
   let recognizing = false;
@@ -220,6 +219,16 @@ document.addEventListener("DOMContentLoaded", () => {
     recognition.lang = "en-US";
     recognition.interimResults = false;
     recognition.maxAlternatives = 1;
+
+    recognition.onstart = () => {
+      recognizing = true;
+    };
+
+    recognition.onerror = (event) => {};
+
+    recognition.onend = () => {
+      recognizing = false;
+    };
 
     recognition.onresult = (event) => {
       const transcript = event.results[0][0].transcript.trim();
@@ -233,28 +242,18 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     };
 
-    if (micBtn) {
-      micBtn.addEventListener("mousedown", () => {
-        if (!recognizing) {
-          recognition.start();
-          recognizing = true;
-        }
-      });
-
-      micBtn.addEventListener("mouseup", () => {
-        if (recognizing) {
-          recognition.stop();
-          recognizing = false;
-        }
-      });
-
-      micBtn.addEventListener("mouseleave", () => {
-        if (recognizing) {
-          recognition.stop();
-          recognizing = false;
-        }
-      });
-    }
+    document.addEventListener("keydown", (event) => {
+      if (event.code === "Space" && !recognizing && recognition) {
+        event.preventDefault();
+        recognition.start();
+      }
+    });
+    document.addEventListener("keyup", (event) => {
+      if (event.code === "Space" && recognizing && recognition) {
+        event.preventDefault();
+        recognition.stop();
+      }
+    });
   } else {
     if (micBtn) {
       micBtn.disabled = true;
@@ -263,7 +262,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // Event bindings
   if (startBtn) {
     startBtn.addEventListener("click", async () => {
       await createNewSession();
