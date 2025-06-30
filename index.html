@@ -4,7 +4,13 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Shark Tank AI</title>
+
+  <!-- Tailwind CSS (optional) -->
   <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- LiveKit Client UMD -->
+  <script src="https://cdn.jsdelivr.net/npm/livekit-client/dist/livekit-client.umd.min.js"></script>
+
   <style>
     body {
       margin: 0;
@@ -14,9 +20,8 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: flex-start;
-      min-height: 100vh;
       padding: 20px;
+      min-height: 100vh;
     }
 
     .container {
@@ -27,9 +32,6 @@
       max-width: 400px;
       color: white;
       text-align: center;
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-start;
     }
 
     .logo {
@@ -47,6 +49,10 @@
 
     .shark-text {
       width: 200px;
+    }
+
+    .ai-box {
+      width: 40px;
     }
 
     .timer {
@@ -67,8 +73,12 @@
       margin: 15px 0;
       border-radius: 10px;
       overflow: hidden;
+    }
+
+    .video-frame video {
       width: 100%;
-      height: auto;
+      display: block;
+      border-radius: 10px;
     }
 
     .name {
@@ -83,23 +93,18 @@
       margin-bottom: 10px;
     }
 
-    .end-button {
-      margin-top: 20px;
-      background: none;
-      border: none;
-      padding: 0;
-      cursor: pointer;
+    .controls {
+      margin-top: 10px;
     }
 
-    .end-button img {
+    .controls button {
+      margin: 5px 0;
+      padding: 10px;
       width: 100%;
-      max-width: 240px;
-    }
-
-    /* Button styling copied from old HTML */
-    .btn {
-      @apply px-4 py-2 rounded-lg font-semibold transition-colors w-full mb-2;
-      display: block;
+      border-radius: 8px;
+      font-weight: bold;
+      font-size: 14px;
+      cursor: pointer;
     }
 
     .btn-primary {
@@ -129,26 +134,34 @@
       background-color: #ef4444;
     }
 
-    .controls, .input-area {
-      background: rgba(255, 255, 255, 0.05);
-      backdrop-filter: blur(8px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 12px;
-      padding: 12px;
-      margin-top: 12px;
+    .input-area {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
     }
 
-    input[type="text"] {
-      width: 100%;
-      padding: 8px;
-      border-radius: 8px;
-      background: #1f2937;
+    .input-area input {
+      flex: 1;
+      padding: 10px;
+      border-radius: 6px;
+      border: 1px solid #333;
+      background-color: #1a1a2e;
       color: white;
-      border: 1px solid #374151;
-      margin-bottom: 8px;
     }
 
-    /* Responsive */
+    .end-button {
+      margin-top: 20px;
+      background: none;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+    }
+
+    .end-button img {
+      width: 100%;
+      max-width: 240px;
+    }
+
     @media (max-width: 480px) {
       .container {
         padding: 20px 16px;
@@ -180,35 +193,37 @@
       TIME LEFT <span class="time-box">9:50</span>
     </div>
 
-    <!-- Heygen video player here -->
     <div class="video-frame">
-      <div id="heygen-player" style="width: 100%; height: 220px; background-color: black;">
-        <!-- Heygen iframe or SDK video player should be loaded here -->
-      </div>
+      <video id="mediaElement" autoplay muted playsinline></video>
     </div>
 
     <div class="name">Lexi Leap</div>
     <div class="role">The Innovation Futurist</div>
 
-    <!-- Buttons Section (Old HTML Controls) -->
+    <!-- Buttons -->
     <div class="controls">
-      <button id="startBtn" class="btn btn-primary">▶️ Start</button>
-      <button id="closeBtn" class="btn btn-danger">⏹️ Close</button>
-      <button id="micBtn" class="btn btn-secondary">🎤 Hold Space to Talk</button>
+      <button id="startBtn" class="btn-primary">▶️ Start</button>
+      <button id="closeBtn" class="btn-danger">⏹️ Close</button>
+      <button id="micBtn" class="btn-secondary">🎤 Hold Space to Talk</button>
+      <button id="downloadTranscriptBtn" class="btn-secondary">⬇️ Download Transcript</button>
     </div>
 
+    <!-- Input + Send -->
     <div class="input-area">
-      <input type="text" id="taskInput" placeholder="Type something..." />
-      <button id="talkBtn" class="btn btn-primary">💬 Send</button>
+      <input id="taskInput" type="text" placeholder="Type something..." />
+      <button id="talkBtn" class="btn-primary">💬 Send</button>
     </div>
+
+    <!-- Transcript/Status -->
+    <div id="status" class="controls font-mono text-sm h-32 overflow-y-auto mt-3"></div>
   </div>
 
-  <!-- End Button Outside -->
+  <!-- End Session Button -->
   <button class="end-button">
     <img src="images/end-session-btn.png" alt="End Session Button" />
   </button>
 
-  <!-- JS script placeholder -->
-  <script src="./app.js"></script>
+  <!-- Your JS Logic -->
+  <script defer src="app.js"></script>
 </body>
 </html>
