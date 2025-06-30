@@ -199,6 +199,8 @@ document.addEventListener("DOMContentLoaded", () => {
     if (startBtn) startBtn.style.display = "none";
     if (toggleBtn) toggleBtn.style.display = "block";
     if (micBtn) micBtn.style.display = "block";
+    if (downloadBtn) downloadBtn.style.display = "block";
+    if (endSessionBtn) endSessionBtn.style.display = "block";
     if (inputArea) inputArea.style.display = "none";
 
     startCountdown();
