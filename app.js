@@ -296,6 +296,8 @@ if (endSessionBtn) {
     if (startBtn) startBtn.style.display = "block";
     if (micBtn) micBtn.style.display = "none";
     if (inputArea) inputArea.style.display = "none";
+    if (downloadBtn) downloadBtn.style.display = "none";
+    if (endSessionBtn) endSessionBtn.style.display = "none";
     if (toggleBtn) toggleBtn.style.display = "none";
     if (timerDisplay) timerDisplay.textContent = "10:00";
   }
