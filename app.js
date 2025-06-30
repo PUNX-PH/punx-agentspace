@@ -21,6 +21,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const inputArea = document.querySelector(".input-area");
   const timerDisplay = document.querySelector(".time-box");
 
+  if (micBtn) micBtn.style.display = "none";
+  if (inputArea) inputArea.style.display = "none";
+  if (downloadBtn) downloadBtn.style.display = "none";
+  if (endSessionBtn) endSessionBtn.style.display = "none";
+
   const loadingOverlay = document.createElement("div");
   loadingOverlay.style.position = "fixed";
   loadingOverlay.style.top = 0;
@@ -62,8 +67,6 @@ document.addEventListener("DOMContentLoaded", () => {
   if (startBtn && startBtn.parentNode) startBtn.parentNode.insertBefore(toggleBtn, startBtn.nextSibling);
 
   let mode = "voice";
-  if (micBtn) micBtn.style.display = "none";
-  if (inputArea) inputArea.style.display = "none";
 
   async function getSessionToken() {
     const response = await fetch(`${API_CONFIG.serverUrl}/v1/streaming.create_token`, {
@@ -200,87 +203,26 @@ document.addEventListener("DOMContentLoaded", () => {
     if (toggleBtn) toggleBtn.style.display = "block";
     if (micBtn) micBtn.style.display = "block";
     if (inputArea) inputArea.style.display = "none";
+    if (downloadBtn) downloadBtn.style.display = "block";
+    if (endSessionBtn) endSessionBtn.style.display = "block";
 
     startCountdown();
   }
 
-  toggleBtn.addEventListener("click", () => {
-    if (mode === "voice") {
-      mode = "chat";
-      toggleBtn.textContent = "Switch to Voice";
-      micBtn.style.display = "none";
-      inputArea.style.display = "flex";
-    } else {
-      mode = "voice";
-      toggleBtn.textContent = "Switch to Chat";
-      micBtn.style.display = "block";
-      inputArea.style.display = "none";
-    }
-  });
-
-  if (startBtn)
+  if (startBtn) {
     startBtn.addEventListener("click", async () => {
       await createNewSession();
       await startStreamingSession();
     });
+  }
 
-  if (talkBtn)
-    talkBtn.addEventListener("click", () => {
-      const text = taskInput?.value.trim();
-      if (text) {
-        transcriptLog.push({ speaker: "user", text, timestamp: new Date().toISOString() });
-        sendText(text, "talk");
-        taskInput.value = "";
-      }
-    });
-    if (endSessionBtn) {
+  if (endSessionBtn) {
     endSessionBtn.addEventListener("click", () => {
-        closeSession();
-    });
-    }
-  if (downloadBtn) downloadBtn.addEventListener("click", () => {
-    if (!transcriptLog.length) return;
-    const blob = new Blob([JSON.stringify(transcriptLog, null, 2)], {
-      type: "application/json",
-    });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `transcript_${sessionInfo?.session_id || "session"}.json`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-  });
-
-  async function sendText(text, taskType = "talk") {
-    if (!sessionInfo) return;
-
-    await fetch(`${API_CONFIG.serverUrl}/v1/streaming.task`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${sessionToken}`,
-      },
-      body: JSON.stringify({
-        session_id: sessionInfo.session_id,
-        text,
-        task_type: taskType,
-      }),
+      closeSession();
     });
   }
 
-  async function closeSession() {
-    if (!sessionInfo) return;
-
-    await fetch(`${API_CONFIG.serverUrl}/v1/streaming.stop`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${sessionToken}`,
-      },
-      body: JSON.stringify({ session_id: sessionInfo.session_id }),
-    });
-
+  function closeSession() {
     if (webSocket) webSocket.close();
     if (room) room.disconnect();
     if (mediaElement) mediaElement.srcObject = null;
@@ -291,15 +233,17 @@ document.addEventListener("DOMContentLoaded", () => {
     sessionToken = null;
     avatarBuffer = [];
     avatarSpeaking = false;
+
     clearInterval(countdownInterval);
+    if (timerDisplay) timerDisplay.textContent = "10:00";
 
     if (startBtn) startBtn.style.display = "block";
+    if (toggleBtn) toggleBtn.style.display = "none";
     if (micBtn) micBtn.style.display = "none";
     if (inputArea) inputArea.style.display = "none";
-    if (toggleBtn) toggleBtn.style.display = "none";
-    if (timerDisplay) timerDisplay.textContent = "10:00";
+    if (downloadBtn) downloadBtn.style.display = "none";
+    if (endSessionBtn) endSessionBtn.style.display = "none";
   }
-
   // Speech Recognition
   window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   let recognition = null;
