@@ -6,7 +6,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   let sessionInfo = null;
   let room = null;
-  let mediaStream = null;
+  let mediaStream = new MediaStream();
   let webSocket = null;
   let sessionToken = null;
   let transcriptLog = [];
@@ -73,15 +73,16 @@ document.addEventListener("DOMContentLoaded", () => {
       },
       body: JSON.stringify({
         quality: "high",
-        avatar_name: "Dexter_Lawyer_Sitting_public",
+        avatar_name: "Rachel_default_avatar", // Use a valid public avatar
         version: "v2",
         video_encoding: "H264",
-        knowledge_base: "...",
+        knowledge_base: "..."
       }),
     });
 
     const data = await response.json();
     sessionInfo = data.data;
+    updateStatus("🧠 Session created");
 
     room = new LivekitClient.Room({
       adaptiveStream: true,
@@ -91,8 +92,7 @@ document.addEventListener("DOMContentLoaded", () => {
       },
     });
 
-    mediaStream = new MediaStream();
-
+    // Handle LiveKit room events
     room.on(LivekitClient.RoomEvent.DataReceived, (payload) => {
       const dataStr = new TextDecoder().decode(payload);
       try {
@@ -115,17 +115,19 @@ document.addEventListener("DOMContentLoaded", () => {
           avatarSpeaking = false;
         }
       } catch (e) {
-        console.warn("Invalid JSON message:", dataStr);
+        console.warn("Invalid JSON from avatar:", dataStr);
       }
     });
 
-    room.on(LivekitClient.RoomEvent.TrackSubscribed, (track) => {
+    room.on(LivekitClient.RoomEvent.TrackSubscribed, (track, pub, participant) => {
       if (track.kind === "video" || track.kind === "audio") {
+        updateStatus(`🔔 Track subscribed: ${track.kind}`);
         mediaStream.addTrack(track.mediaStreamTrack);
-        if (mediaElement) {
-          mediaElement.srcObject = mediaStream;
-          updateStatus("🎥 Media stream ready");
-        }
+        mediaElement.srcObject = mediaStream;
+        mediaElement.play().catch(err => {
+          updateStatus("⚠️ Autoplay blocked. Click anywhere to resume.");
+          document.body.addEventListener("click", () => mediaElement.play());
+        });
       }
     });
 
@@ -134,13 +136,16 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     room.on(LivekitClient.RoomEvent.Disconnected, (reason) => {
-      updateStatus(`⚠️ Room disconnected: ${reason}`);
+      updateStatus(`⚠️ Disconnected: ${reason}`);
     });
 
+    mediaElement.srcObject = mediaStream;
+    mediaElement.autoplay = true;
+    mediaElement.playsInline = true;
+    mediaElement.muted = false;
+
     await room.prepareConnection(sessionInfo.url, sessionInfo.access_token);
-    updateStatus("🧠 Room connection prepared");
     await connectWebSocket(sessionInfo.session_id);
-    updateStatus("🔌 WebSocket connected");
   }
 
   async function startStreamingSession() {
@@ -154,12 +159,11 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     await room.connect(sessionInfo.url, sessionInfo.access_token);
-    updateStatus("✅ Streaming session started");
+    updateStatus("🚀 Streaming session started");
   }
 
   async function sendText(text, taskType = "talk") {
     if (!sessionInfo) return updateStatus("⚠️ No active session");
-
     await fetch(`${API_CONFIG.serverUrl}/v1/streaming.task`, {
       method: "POST",
       headers: {
@@ -172,14 +176,12 @@ document.addEventListener("DOMContentLoaded", () => {
         task_type: taskType,
       }),
     });
-
-    updateStatus(`📤 Sent: "${text}"`);
+    updateStatus(`💬 Sent: "${text}"`);
   }
 
-  // ✅ GLOBAL: Expose for End Session Button
+  // Global: used by HTML onclick for End Session
   window.closeSession = async function () {
     if (!sessionInfo) return updateStatus("⚠️ No active session");
-
     await fetch(`${API_CONFIG.serverUrl}/v1/streaming.stop`, {
       method: "POST",
       headers: {
@@ -195,7 +197,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     sessionInfo = null;
     room = null;
-    mediaStream = null;
+    mediaStream = new MediaStream();
     sessionToken = null;
     avatarBuffer = [];
     avatarSpeaking = false;
@@ -204,11 +206,8 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   function downloadTranscript() {
-    if (!transcriptLog.length) return updateStatus("📭 No transcript to download.");
-
-    const blob = new Blob([JSON.stringify(transcriptLog, null, 2)], {
-      type: "application/json",
-    });
+    if (!transcriptLog.length) return updateStatus("📭 No transcript to download");
+    const blob = new Blob([JSON.stringify(transcriptLog, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
@@ -216,11 +215,10 @@ document.addEventListener("DOMContentLoaded", () => {
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
-
-    updateStatus("⬇️ Transcript downloaded.");
+    updateStatus("⬇️ Transcript downloaded");
   }
 
-  // 🎤 Speech Recognition
+  // Speech Recognition (Hold Space to Talk)
   window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   let recognition = null;
   let recognizing = false;
@@ -235,16 +233,13 @@ document.addEventListener("DOMContentLoaded", () => {
       recognizing = true;
       updateStatus("🎙️ Listening...");
     };
-
     recognition.onerror = (event) => {
       updateStatus(`❗ Mic error: ${event.error}`);
     };
-
     recognition.onend = () => {
       recognizing = false;
       updateStatus("🛑 Mic stopped");
     };
-
     recognition.onresult = (event) => {
       const transcript = event.results[0][0].transcript.trim();
       if (transcript) {
@@ -279,7 +274,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // 🎯 Manual Text Send
+  // Talk button handler
   const talkBtn = document.getElementById("talkBtn");
   if (talkBtn)
     talkBtn.addEventListener("click", () => {
@@ -291,18 +286,17 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
 
-  // 📥 Download transcript
   const downloadBtn = document.getElementById("downloadTranscriptBtn");
   if (downloadBtn) downloadBtn.addEventListener("click", downloadTranscript);
 
-  // 🚀 Auto-start session on load
+  // Auto-start session on page load
   (async () => {
     try {
-      updateStatus("🔃 Starting session...");
+      updateStatus("🔄 Starting session...");
       await createNewSession();
       await startStreamingSession();
     } catch (err) {
-      updateStatus("❌ Failed to auto-start: " + err.message);
+      updateStatus("❌ Auto-start failed: " + err.message);
     }
   })();
 });
