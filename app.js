@@ -12,8 +12,8 @@ let transcriptLog = [];
 
 const statusElement = document.getElementById("status");
 const mediaElement = document.getElementById("mediaElement");
-const avatarID = document.getElementById("avatarID");
 const taskInput = document.getElementById("taskInput");
+const micBtn = document.getElementById("micBtn");
 
 function updateStatus(message) {
   const timestamp = new Date().toLocaleTimeString();
@@ -34,6 +34,35 @@ async function getSessionToken() {
   updateStatus("Session token obtained");
 }
 
+async function connectWebSocket(sessionId) {
+  const params = new URLSearchParams({
+    session_id: sessionId,
+    session_token: sessionToken,
+    silence_response: false,
+    opening_text: "Hello, how can I help you?",
+    stt_language: "en",
+  });
+
+  const wsUrl = `wss://${new URL(API_CONFIG.serverUrl).hostname}/v1/ws/streaming.chat?${params}`;
+  webSocket = new WebSocket(wsUrl);
+
+  webSocket.addEventListener("message", (event) => {
+    const eventData = JSON.parse(event.data);
+    console.log("WebSocket Event:", eventData);
+
+    if (eventData.type === "USER_TALKING_MESSAGE") {
+      transcriptLog.push({
+        speaker: "user",
+        text: eventData.text,
+        timestamp: new Date().toISOString(),
+      });
+    }
+  });
+}
+
+let avatarBuffer = [];
+let avatarSpeaking = false;
+
 async function createNewSession() {
   if (!sessionToken) await getSessionToken();
 
@@ -45,17 +74,96 @@ async function createNewSession() {
     },
     body: JSON.stringify({
       quality: "high",
-      avatar_name: avatarID.value,
+      avatar_name: "Dexter_Lawyer_Sitting_public",
       version: "v2",
       video_encoding: "H264",
+      knowledge_base: `
+Specialty: Business Models, Monetization, Scalability, Operations
+Personality: Analytical, calm, mentor-like
+Knowledge Focus:
+- Revenue models and pricing strategy
+- Financial forecasting and unit economics
+- Operational efficiency and scalability
+- Risk management and startup resilience
+Behavioral Traits:
+- Logical, precise, values long-term sustainability
+- Focuses on whether the idea is structurally sound
+- Encourages data-backed thinking and planning
+Response Style:
+Neutral and detailed with a strategic tone. Uses analogies from real startups. Asks: “How will this make money at scale?”
+`
     }),
   });
 
   const data = await response.json();
   sessionInfo = data.data;
 
+  room = new LivekitClient.Room({
+    adaptiveStream: true,
+    dynacast: true,
+    videoCaptureDefaults: {
+      resolution: LivekitClient.VideoPresets.h720.resolution,
+    },
+  });
+
+  room.on(LivekitClient.RoomEvent.DataReceived, (payload) => {
+    const dataStr = new TextDecoder().decode(payload);
+    try {
+      const data = JSON.parse(dataStr);
+      console.log("Room message:", data);
+
+      if (data.type === "avatar_start_talking") {
+        avatarSpeaking = true;
+        avatarBuffer = [];
+      }
+
+      if (data.type === "avatar_talking_message" && avatarSpeaking) {
+        avatarBuffer.push(data.message);
+      }
+
+      if (data.type === "avatar_end_message" && avatarSpeaking) {
+        const fullMessage = avatarBuffer.join(" ").replace(/\s+/g, " ").trim();
+        transcriptLog.push({
+          speaker: "avatar",
+          text: fullMessage,
+          timestamp: new Date().toISOString(),
+        });
+        avatarBuffer = [];
+        avatarSpeaking = false;
+      }
+    } catch (e) {
+      console.warn("Invalid JSON message:", dataStr);
+    }
+  });
+
+  room.on(LivekitClient.RoomEvent.TrackSubscribed, (track) => {
+    if (track.kind === "video" || track.kind === "audio") {
+      mediaStream.addTrack(track.mediaStreamTrack);
+      if (
+        mediaStream.getVideoTracks().length > 0 &&
+        mediaStream.getAudioTracks().length > 0
+      ) {
+        mediaElement.srcObject = mediaStream;
+        updateStatus("Media stream ready");
+      }
+    }
+  });
+
+  room.on(LivekitClient.RoomEvent.TrackUnsubscribed, (track) => {
+    const mediaTrack = track.mediaStreamTrack;
+    if (mediaTrack) mediaStream.removeTrack(mediaTrack);
+  });
+
+  room.on(LivekitClient.RoomEvent.Disconnected, (reason) => {
+    updateStatus(`Room disconnected: ${reason}`);
+  });
+
   mediaStream = new MediaStream();
 
+  await room.prepareConnection(sessionInfo.url, sessionInfo.access_token);
+  updateStatus("Connection prepared");
+
+  await connectWebSocket(sessionInfo.session_id);
   updateStatus("Session created successfully");
 }
 
@@ -69,7 +177,10 @@ async function startStreamingSession() {
     body: JSON.stringify({ session_id: sessionInfo.session_id }),
   });
 
-  updateStatus("Streaming started");
+  await room.connect(sessionInfo.url, sessionInfo.access_token);
+  updateStatus("Connected to room");
+  document.querySelector("#startBtn").disabled = true;
+  updateStatus("Streaming started successfully");
 }
 
 async function sendText(text, taskType = "talk") {
@@ -104,20 +215,26 @@ async function closeSession() {
   });
 
   if (webSocket) webSocket.close();
-  mediaElement.srcObject = null;
+  if (room) room.disconnect();
 
+  mediaElement.srcObject = null;
   sessionInfo = null;
   room = null;
   mediaStream = null;
   sessionToken = null;
+  avatarBuffer = [];
+  avatarSpeaking = false;
 
+  document.querySelector("#startBtn").disabled = false;
   updateStatus("Session closed");
 }
 
 function downloadTranscript() {
   if (!transcriptLog.length) return updateStatus("Transcript is empty.");
 
-  const blob = new Blob([JSON.stringify(transcriptLog, null, 2)], { type: "application/json" });
+  const blob = new Blob([JSON.stringify(transcriptLog, null, 2)], {
+    type: "application/json",
+  });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
@@ -126,30 +243,72 @@ function downloadTranscript() {
   a.click();
   document.body.removeChild(a);
 
-  updateStatus("Transcript downloaded");
+  updateStatus("Transcript JSON downloaded.");
 }
 
-// Timer countdown
-let secondsLeft = 600;
-const timerSpan = document.getElementById('timeLeft');
-setInterval(() => {
-  if (secondsLeft > 0) {
-    secondsLeft--;
-    const min = String(Math.floor(secondsLeft / 60)).padStart(2, '0');
-    const sec = String(secondsLeft % 60).padStart(2, '0');
-    timerSpan.textContent = `${min}:${sec}`;
-  }
-}, 1000);
+// Speech Recognition for Hold Space to Talk
+window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+let recognition = null;
+let recognizing = false;
 
-// Button event handlers
-document.getElementById("startBtn").addEventListener("click", async () => {
+if (window.SpeechRecognition) {
+  recognition = new window.SpeechRecognition();
+  recognition.lang = "en-US";
+  recognition.interimResults = false;
+  recognition.maxAlternatives = 1;
+
+  recognition.onstart = () => {
+    recognizing = true;
+    updateStatus("🎤 Microphone listening...");
+  };
+
+  recognition.onerror = (event) => {
+    updateStatus(`Microphone error: ${event.error}`);
+  };
+
+  recognition.onend = () => {
+    recognizing = false;
+    updateStatus("🎤 Microphone stopped.");
+  };
+
+  recognition.onresult = (event) => {
+    const transcript = event.results[0][0].transcript.trim();
+    if (transcript) {
+      updateStatus(`You said: "${transcript}"`);
+      transcriptLog.push({
+        speaker: "user",
+        text: transcript,
+        timestamp: new Date().toISOString(),
+      });
+      sendText(transcript, "talk");
+    }
+  };
+} else {
+  micBtn.disabled = true;
+  micBtn.textContent = "🎤 Not Supported";
+  micBtn.classList.add("opacity-50", "cursor-not-allowed");
+}
+
+document.addEventListener("keydown", (event) => {
+  if (event.code === "Space" && !recognizing && recognition) {
+    event.preventDefault();
+    recognition.start();
+  }
+});
+document.addEventListener("keyup", (event) => {
+  if (event.code === "Space" && recognizing && recognition) {
+    event.preventDefault();
+    recognition.stop();
+  }
+});
+
+// Event bindings
+document.querySelector("#startBtn").addEventListener("click", async () => {
   await createNewSession();
   await startStreamingSession();
 });
-
-document.getElementById("closeBtn").addEventListener("click", closeSession);
-
-document.getElementById("talkBtn").addEventListener("click", () => {
+document.querySelector("#closeBtn").addEventListener("click", closeSession);
+document.querySelector("#talkBtn").addEventListener("click", () => {
   const text = taskInput.value.trim();
   if (text) {
     transcriptLog.push({ speaker: "user", text, timestamp: new Date().toISOString() });
@@ -157,15 +316,4 @@ document.getElementById("talkBtn").addEventListener("click", () => {
     taskInput.value = "";
   }
 });
-
-document.getElementById("downloadTranscriptBtn").addEventListener("click", downloadTranscript);
-
-document.getElementById("endSessionBtn").addEventListener("click", closeSession);
-
-document.getElementById("muteMicBtn").addEventListener("click", () => {
-  alert("Microphone muted/unmuted (implement logic)");
-});
-
-document.getElementById("endChatBtn").addEventListener("click", () => {
-  alert("Chat ended (implement logic)");
-});
+document.querySelector("#downloadTranscriptBtn").addEventListener("click", downloadTranscript);
