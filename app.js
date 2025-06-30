@@ -98,7 +98,7 @@ Neutral and detailed with a strategic tone. Uses analogies from real startups. A
   const data = await response.json();
   sessionInfo = data.data;
 
-  const LivekitClient = window.livekitClient;
+ const LivekitClient = window.Livekit;
 
   room = new LivekitClient.Room({
     adaptiveStream: true,
