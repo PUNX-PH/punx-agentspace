@@ -5,10 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Shark Tank AI</title>
 
-  <!-- Tailwind CSS (optional) -->
+  <!-- Tailwind (optional for utilities) -->
   <script src="https://cdn.tailwindcss.com"></script>
 
-  <!-- LiveKit Client UMD -->
+  <!-- LiveKit client -->
   <script src="https://cdn.jsdelivr.net/npm/livekit-client/dist/livekit-client.umd.min.js"></script>
 
   <style>
@@ -49,10 +49,6 @@
 
     .shark-text {
       width: 200px;
-    }
-
-    .ai-box {
-      width: 40px;
     }
 
     .timer {
@@ -200,30 +196,24 @@
     <div class="name">Lexi Leap</div>
     <div class="role">The Innovation Futurist</div>
 
-    <!-- Buttons -->
     <div class="controls">
-      <button id="startBtn" class="btn-primary">▶️ Start</button>
-      <button id="closeBtn" class="btn-danger">⏹️ Close</button>
       <button id="micBtn" class="btn-secondary">🎤 Hold Space to Talk</button>
       <button id="downloadTranscriptBtn" class="btn-secondary">⬇️ Download Transcript</button>
     </div>
 
-    <!-- Input + Send -->
     <div class="input-area">
       <input id="taskInput" type="text" placeholder="Type something..." />
       <button id="talkBtn" class="btn-primary">💬 Send</button>
     </div>
 
-    <!-- Transcript/Status -->
     <div id="status" class="controls font-mono text-sm h-32 overflow-y-auto mt-3"></div>
   </div>
 
-  <!-- End Session Button -->
-  <button class="end-button">
+  <button class="end-button" id="endSessionBtn">
     <img src="images/end-session-btn.png" alt="End Session Button" />
   </button>
 
-  <!-- Your JS Logic -->
+  <!-- JS -->
   <script defer src="app.js"></script>
 </body>
 </html>
