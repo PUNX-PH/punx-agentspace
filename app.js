@@ -73,7 +73,7 @@ document.addEventListener("DOMContentLoaded", () => {
       },
       body: JSON.stringify({
         quality: "high",
-        avatar_name: "Rachel_default_avatar", // Use a valid public avatar
+        avatar_name: "Dexter_Lawyer_Sitting_public", // Use a valid public avatar
         version: "v2",
         video_encoding: "H264",
         knowledge_base: "..."
