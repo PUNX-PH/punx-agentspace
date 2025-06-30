@@ -22,49 +22,32 @@ document.addEventListener("DOMContentLoaded", () => {
   const timerDisplay = document.querySelector(".time-box");
 
   const loadingOverlay = document.createElement("div");
-  loadingOverlay.style = `
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0,0,0,0.8); color: white; font-size: 24px;
-    display: flex; align-items: center; justify-content: center;
-    z-index: 1000;
-  `;
+  loadingOverlay.style.position = "fixed";
+  loadingOverlay.style.top = 0;
+  loadingOverlay.style.left = 0;
+  loadingOverlay.style.width = "100%";
+  loadingOverlay.style.height = "100%";
+  loadingOverlay.style.background = "rgba(0, 0, 0, 0.8)";
+  loadingOverlay.style.color = "white";
+  loadingOverlay.style.fontSize = "24px";
+  loadingOverlay.style.display = "flex";
+  loadingOverlay.style.justifyContent = "center";
+  loadingOverlay.style.alignItems = "center";
+  loadingOverlay.style.zIndex = 1000;
   loadingOverlay.innerText = "Loading Avatar...";
   loadingOverlay.style.display = "none";
   document.body.appendChild(loadingOverlay);
 
-  const toggleBtn = document.createElement("button");
-  toggleBtn.textContent = "Switch to Chat";
-  toggleBtn.className = "btn-secondary mt-2";
-  toggleBtn.style.display = "none";
-  startBtn?.parentNode?.insertBefore(toggleBtn, startBtn.nextSibling);
-
-  let mode = "voice";
-  if (micBtn) micBtn.style.display = "none";
-  if (inputArea) inputArea.style.display = "none";
-
-  toggleBtn.addEventListener("click", () => {
-    if (mode === "voice") {
-      micBtn.style.display = "none";
-      inputArea.style.display = "flex";
-      toggleBtn.textContent = "Switch to Voice";
-      mode = "text";
-    } else {
-      micBtn.style.display = "block";
-      inputArea.style.display = "none";
-      toggleBtn.textContent = "Switch to Chat";
-      mode = "voice";
-    }
-  });
-
   let countdownInterval;
   let remainingTime = 600;
+
   function startCountdown() {
     if (!timerDisplay) return;
     countdownInterval = setInterval(() => {
       remainingTime--;
-      const m = Math.floor(remainingTime / 60);
-      const s = remainingTime % 60;
-      timerDisplay.textContent = `${m}:${s.toString().padStart(2, '0')}`;
+      const minutes = Math.floor(remainingTime / 60);
+      const seconds = remainingTime % 60;
+      timerDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
       if (remainingTime <= 0) {
         clearInterval(countdownInterval);
         closeSession();
@@ -72,15 +55,25 @@ document.addEventListener("DOMContentLoaded", () => {
     }, 1000);
   }
 
+  const toggleBtn = document.createElement("button");
+  toggleBtn.textContent = "Switch to Chat";
+  toggleBtn.className = "btn-secondary mt-2";
+  toggleBtn.style.display = "none";
+  if (startBtn && startBtn.parentNode) startBtn.parentNode.insertBefore(toggleBtn, startBtn.nextSibling);
+
+  let mode = "voice";
+  if (micBtn) micBtn.style.display = "none";
+  if (inputArea) inputArea.style.display = "none";
+
   async function getSessionToken() {
-    const res = await fetch(`${API_CONFIG.serverUrl}/v1/streaming.create_token`, {
+    const response = await fetch(`${API_CONFIG.serverUrl}/v1/streaming.create_token`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         "X-Api-Key": API_CONFIG.apiKey,
       },
     });
-    const data = await res.json();
+    const data = await response.json();
     sessionToken = data.data.token;
   }
 
@@ -92,12 +85,18 @@ document.addEventListener("DOMContentLoaded", () => {
       opening_text: "Hello, how can I help you?",
       stt_language: "en",
     });
+
     const wsUrl = `wss://${new URL(API_CONFIG.serverUrl).hostname}/v1/ws/streaming.chat?${params}`;
     webSocket = new WebSocket(wsUrl);
-    webSocket.addEventListener("message", (e) => {
-      const msg = JSON.parse(e.data);
-      if (msg.type === "USER_TALKING_MESSAGE") {
-        transcriptLog.push({ speaker: "user", text: msg.text, timestamp: new Date().toISOString() });
+
+    webSocket.addEventListener("message", (event) => {
+      const eventData = JSON.parse(event.data);
+      if (eventData.type === "USER_TALKING_MESSAGE") {
+        transcriptLog.push({
+          speaker: "user",
+          text: eventData.text,
+          timestamp: new Date().toISOString(),
+        });
       }
     });
   }
@@ -107,9 +106,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
   async function createNewSession() {
     if (!sessionToken) await getSessionToken();
+
     loadingOverlay.style.display = "flex";
 
-    const res = await fetch(`${API_CONFIG.serverUrl}/v1/streaming.new`, {
+    const response = await fetch(`${API_CONFIG.serverUrl}/v1/streaming.new`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -120,11 +120,11 @@ document.addEventListener("DOMContentLoaded", () => {
         avatar_name: "Dexter_Lawyer_Sitting_public",
         version: "v2",
         video_encoding: "H264",
-        knowledge_base: "...",
+        knowledge_base: "..."
       }),
     });
 
-    const data = await res.json();
+    const data = await response.json();
     sessionInfo = data.data;
 
     room = new LivekitClient.Room({
@@ -136,27 +136,45 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     room.on(LivekitClient.RoomEvent.DataReceived, (payload) => {
-      const msg = JSON.parse(new TextDecoder().decode(payload));
-      if (msg.type === "avatar_start_talking") {
-        avatarSpeaking = true;
-        avatarBuffer = [];
-      } else if (msg.type === "avatar_talking_message" && avatarSpeaking) {
-        avatarBuffer.push(msg.message);
-      } else if (msg.type === "avatar_end_message" && avatarSpeaking) {
-        const full = avatarBuffer.join(" ").replace(/\s+/g, " ").trim();
-        transcriptLog.push({ speaker: "avatar", text: full, timestamp: new Date().toISOString() });
-        avatarBuffer = [];
-        avatarSpeaking = false;
-      }
+      const dataStr = new TextDecoder().decode(payload);
+      try {
+        const data = JSON.parse(dataStr);
+        if (data.type === "avatar_start_talking") {
+          avatarSpeaking = true;
+          avatarBuffer = [];
+        }
+        if (data.type === "avatar_talking_message" && avatarSpeaking) {
+          avatarBuffer.push(data.message);
+        }
+        if (data.type === "avatar_end_message" && avatarSpeaking) {
+          const fullMessage = avatarBuffer.join(" ").replace(/\s+/g, " ").trim();
+          transcriptLog.push({
+            speaker: "avatar",
+            text: fullMessage,
+            timestamp: new Date().toISOString(),
+          });
+          avatarBuffer = [];
+          avatarSpeaking = false;
+        }
+      } catch (e) {}
     });
 
     room.on(LivekitClient.RoomEvent.TrackSubscribed, (track) => {
       if (track.kind === "video" || track.kind === "audio") {
         mediaStream.addTrack(track.mediaStreamTrack);
-        if (mediaElement) {
+        if (
+          mediaElement &&
+          mediaStream.getVideoTracks().length > 0 &&
+          mediaStream.getAudioTracks().length > 0
+        ) {
           mediaElement.srcObject = mediaStream;
         }
       }
+    });
+
+    room.on(LivekitClient.RoomEvent.TrackUnsubscribed, (track) => {
+      const mediaTrack = track.mediaStreamTrack;
+      if (mediaTrack) mediaStream.removeTrack(mediaTrack);
     });
 
     mediaStream = new MediaStream();
@@ -175,58 +193,64 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     await room.connect(sessionInfo.url, sessionInfo.access_token);
+
     loadingOverlay.style.display = "none";
-    startBtn.style.display = "none";
-    toggleBtn.style.display = "block";
-    micBtn.style.display = "block";
+
+    if (startBtn) startBtn.style.display = "none";
+    if (toggleBtn) toggleBtn.style.display = "block";
+    if (micBtn) micBtn.style.display = "block";
+    if (inputArea) inputArea.style.display = "none";
+
     startCountdown();
   }
 
-  async function closeSession() {
-    if (!sessionInfo) return;
-
-    await fetch(`${API_CONFIG.serverUrl}/v1/streaming.stop`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${sessionToken}`,
-      },
-      body: JSON.stringify({ session_id: sessionInfo.session_id }),
-    });
-
-    webSocket?.close();
-    room?.disconnect();
-    mediaElement.srcObject = null;
-
-    sessionInfo = null;
-    room = null;
-    mediaStream = null;
-    sessionToken = null;
-    avatarBuffer = [];
-    avatarSpeaking = false;
-
-    clearInterval(countdownInterval);
-    timerDisplay.textContent = "10:00";
-  }
-
-  startBtn?.addEventListener("click", async () => {
-    await createNewSession();
-    await startStreamingSession();
+  toggleBtn.addEventListener("click", () => {
+    if (mode === "voice") {
+      mode = "chat";
+      toggleBtn.textContent = "Switch to Voice";
+      micBtn.style.display = "none";
+      inputArea.style.display = "flex";
+    } else {
+      mode = "voice";
+      toggleBtn.textContent = "Switch to Chat";
+      micBtn.style.display = "block";
+      inputArea.style.display = "none";
+    }
   });
 
-  endSessionBtn?.addEventListener("click", closeSession);
+  if (startBtn)
+    startBtn.addEventListener("click", async () => {
+      await createNewSession();
+      await startStreamingSession();
+    });
 
-  talkBtn?.addEventListener("click", () => {
-    const text = taskInput?.value.trim();
-    if (text) {
-      transcriptLog.push({ speaker: "user", text, timestamp: new Date().toISOString() });
-      sendText(text, "talk");
-      taskInput.value = "";
-    }
+  if (talkBtn)
+    talkBtn.addEventListener("click", () => {
+      const text = taskInput?.value.trim();
+      if (text) {
+        transcriptLog.push({ speaker: "user", text, timestamp: new Date().toISOString() });
+        sendText(text, "talk");
+        taskInput.value = "";
+      }
+    });
+
+  if (downloadBtn) downloadBtn.addEventListener("click", () => {
+    if (!transcriptLog.length) return;
+    const blob = new Blob([JSON.stringify(transcriptLog, null, 2)], {
+      type: "application/json",
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `transcript_${sessionInfo?.session_id || "session"}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
   });
 
   async function sendText(text, taskType = "talk") {
     if (!sessionInfo) return;
+
     await fetch(`${API_CONFIG.serverUrl}/v1/streaming.task`, {
       method: "POST",
       headers: {
@@ -241,27 +265,86 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  if (window.SpeechRecognition || window.webkitSpeechRecognition) {
-    const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+  async function closeSession() {
+    if (!sessionInfo) return;
+
+    await fetch(`${API_CONFIG.serverUrl}/v1/streaming.stop`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${sessionToken}`,
+      },
+      body: JSON.stringify({ session_id: sessionInfo.session_id }),
+    });
+
+    if (webSocket) webSocket.close();
+    if (room) room.disconnect();
+    if (mediaElement) mediaElement.srcObject = null;
+
+    sessionInfo = null;
+    room = null;
+    mediaStream = null;
+    sessionToken = null;
+    avatarBuffer = [];
+    avatarSpeaking = false;
+    clearInterval(countdownInterval);
+
+    if (startBtn) startBtn.style.display = "block";
+    if (micBtn) micBtn.style.display = "none";
+    if (inputArea) inputArea.style.display = "none";
+    if (toggleBtn) toggleBtn.style.display = "none";
+    if (timerDisplay) timerDisplay.textContent = "10:00";
+  }
+
+  // Speech Recognition
+  window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  let recognition = null;
+  let recognizing = false;
+
+  if (window.SpeechRecognition) {
+    recognition = new window.SpeechRecognition();
     recognition.lang = "en-US";
     recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
 
-    document.addEventListener("keydown", (e) => {
-      if (e.code === "Space" && mode === "voice") recognition.start();
-    });
-    document.addEventListener("keyup", (e) => {
-      if (e.code === "Space" && mode === "voice") recognition.stop();
-    });
+    recognition.onstart = () => {
+      recognizing = true;
+    };
 
-    recognition.onresult = (e) => {
-      const transcript = e.results[0][0].transcript.trim();
+    recognition.onerror = (event) => {
+      recognizing = false;
+      console.error(`Speech recognition error: ${event.error}`);
+    };
+
+    recognition.onend = () => {
+      recognizing = false;
+    };
+
+    recognition.onresult = (event) => {
+      const transcript = event.results[0][0].transcript.trim();
       if (transcript) {
-        transcriptLog.push({ speaker: "user", text: transcript, timestamp: new Date().toISOString() });
+        transcriptLog.push({
+          speaker: "user",
+          text: transcript,
+          timestamp: new Date().toISOString(),
+        });
         sendText(transcript, "talk");
       }
     };
-  } else {
-    micBtn.disabled = true;
-    micBtn.textContent = "🎤 Not Supported";
   }
+
+  document.addEventListener("keydown", (event) => {
+    if (event.code === "Space" && recognition && !recognizing && mode === "voice") {
+      event.preventDefault();
+      recognizing = true;
+      recognition.start();
+    }
+  });
+
+  document.addEventListener("keyup", (event) => {
+    if (event.code === "Space" && recognition && recognizing && mode === "voice") {
+      event.preventDefault();
+      recognition.stop();
+    }
+  });
 });
