@@ -233,7 +233,11 @@ document.addEventListener("DOMContentLoaded", () => {
         taskInput.value = "";
       }
     });
-
+    if (endSessionBtn) {
+    endSessionBtn.addEventListener("click", () => {
+        closeSession();
+    });
+    }
   if (downloadBtn) downloadBtn.addEventListener("click", () => {
     if (!transcriptLog.length) return;
     const blob = new Blob([JSON.stringify(transcriptLog, null, 2)], {
