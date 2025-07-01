@@ -10,6 +10,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let webSocket = null;
   let sessionToken = null;
   let transcriptLog = [];
+  let heygenKnowledge = "";
 
   const mediaElement = document.getElementById("mediaElement");
   const taskInput = document.getElementById("taskInput");
@@ -103,11 +104,21 @@ document.addEventListener("DOMContentLoaded", () => {
   let avatarBuffer = [];
   let avatarSpeaking = false;
 
+  // Load the knowledge base from file (async)
+  async function loadKnowledgeBase() {
+    // Use .txt or .json depending on your file
+    const response = await fetch('/max.txt'); 
+    // If it's text:
+    heygenKnowledge = await response.text();
+    // If it's json, do:   heygenKnowledge = await response.json();
+  }
+
+
   async function createNewSession() {
     if (!sessionToken) await getSessionToken();
 
     loadingOverlay.style.display = "flex";
-
+    await loadKnowledgeBase();
     const response = await fetch(`${API_CONFIG.serverUrl}/v1/streaming.new`, {
       method: "POST",
       headers: {
@@ -119,7 +130,7 @@ document.addEventListener("DOMContentLoaded", () => {
         avatar_name: "Dexter_Lawyer_Sitting_public",
         version: "v2",
         video_encoding: "H264",
-        knowledge_base: "..."
+        knowledge_base: heygenKnowledge
       }),
     });
 
