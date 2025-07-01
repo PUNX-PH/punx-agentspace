@@ -267,12 +267,14 @@
 
 <!-- Processing Prompt Modal -->
 <div id="sentPromptModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-80 z-50" style="display:none;">
-  <div class="bg-white rounded-xl px-8 py-7 shadow-lg flex flex-col items-center max-w-[340px] text-center">
-    <div class="text-3xl mb-3 text-blue-600">📨</div>
-    <div class="text-black text-lg font-bold mb-2">Transcript in Process</div>
-    <div class="text-gray-700 mb-4 text-base">Your transcript is being processed and will be sent to your email soon!</div>
+  <div class="bg-[#18183d] border border-[#342282] rounded-2xl px-8 py-8 shadow-2xl flex flex-col items-center max-w-[350px] text-center">
+    <div class="text-3xl mb-4 text-indigo-400">📨</div>
+    <div class="text-white text-xl font-extrabold mb-2">Transcript in Process</div>
+    <div class="text-violet-200 mb-5 text-base leading-snug">
+      Your transcript is being processed<br>and will be sent to your email soon!
+    </div>
     <button id="sentPromptOkBtn"
-      class="mt-2 px-6 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition">
+      class="w-full py-3 rounded-2xl font-bold text-lg bg-gradient-to-r from-[#259dff] to-[#6f39fb] text-white shadow-md hover:from-[#156dcc] hover:to-[#3d28b0] transition-colors flex justify-center items-center gap-2">
       OK
     </button>
   </div>

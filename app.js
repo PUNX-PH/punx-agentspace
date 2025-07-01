@@ -297,11 +297,16 @@ document.getElementById("emailForm").addEventListener("submit", async function (
 
     // Hide the email modal
     document.getElementById("emailModal").style.display = "none";
-    // Show the prompt modal
+    // Show the processing/prompt modal
     document.getElementById("sentPromptModal").style.display = "flex";
   } catch (err) {
     alert("There was a problem saving your transcript: " + err.message);
   }
+});
+
+document.getElementById("sentPromptOkBtn").addEventListener("click", function () {
+  document.getElementById("sentPromptModal").style.display = "none";
+  window.location.href = "https://www.google.com"; // CHANGE this to your real homepage!
 });
 
   async function closeSession() {
