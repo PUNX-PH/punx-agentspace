@@ -275,7 +275,7 @@ if (endSessionBtn) {
     document.getElementById("emailModal").style.display = "flex";
     }
 
-    document.getElementById("emailForm").addEventListener("submit", async function (e) {
+document.getElementById("emailForm").addEventListener("submit", async function (e) {
   e.preventDefault();
   const email = document.getElementById("pitchEmail").value.trim();
 
@@ -294,8 +294,11 @@ if (endSessionBtn) {
     });
 
     if (!response.ok) throw new Error("Failed to send data to Firebase");
-    alert("Your transcript was sent and saved! Thank you!");
+
+    // Hide the email modal
     document.getElementById("emailModal").style.display = "none";
+    // Show the prompt modal
+    document.getElementById("sentPromptModal").style.display = "flex";
   } catch (err) {
     alert("There was a problem saving your transcript: " + err.message);
   }
