@@ -271,12 +271,10 @@ if (endSessionBtn) {
     });
   }
 
-    // Show modal. Call this when session ends!
     function showEmailModal() {
     document.getElementById("emailModal").style.display = "flex";
     }
 
-    // EMAIL FORM SUBMIT ACTION
     document.getElementById("emailForm").addEventListener("submit", function (e) {
     e.preventDefault();
     const email = document.getElementById("pitchEmail").value.trim();
