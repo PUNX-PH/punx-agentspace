@@ -275,27 +275,31 @@ if (endSessionBtn) {
     document.getElementById("emailModal").style.display = "flex";
     }
 
-    document.getElementById("emailForm").addEventListener("submit", function (e) {
-    e.preventDefault();
-    const email = document.getElementById("pitchEmail").value.trim();
+    document.getElementById("emailForm").addEventListener("submit", async function (e) {
+  e.preventDefault();
+  const email = document.getElementById("pitchEmail").value.trim();
 
-    // --- TODO: integrate with your backend to email the transcript! ---
-    // Example:
-    // await fetch('/api/sendTranscript', {method:"POST",body:JSON.stringify({email,transcript:transcriptLog})})
-    // .then(()=>{show confirmation / close modal})
+  if (!email || !transcriptLog.length) {
+    alert("Missing email or transcript!");
+    return;
+  }
 
-    alert("Transcript will be sent to " + email); // Replace with real logic
+  try {
+    const data = { email: email, transcript: transcriptLog };
+    const firebaseUrl = "https://punx-shark-tank-default-rtdb.firebaseio.com/transcripts.json";
+    const response = await fetch(firebaseUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data)
+    });
+
+    if (!response.ok) throw new Error("Failed to send data to Firebase");
+    alert("Your transcript was sent and saved! Thank you!");
     document.getElementById("emailModal").style.display = "none";
-    });
-
-    // HOME BUTTON ACTION (customize as needed)
-    document.getElementById("goHomeBtn").addEventListener("click", function () {
-    window.location.href = "www.google.com"; // change URL if your homepage is elsewhere
-    });
-
-    // Example usage: call showEmailModal() when session ends
-    // (replace in your closeSession or wherever you want to trigger it!)
-    // showEmailModal();
+  } catch (err) {
+    alert("There was a problem saving your transcript: " + err.message);
+  }
+});
 
   async function closeSession() {
     if (!sessionInfo) return;
