@@ -16,7 +16,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const micBtn = document.getElementById("micBtn");
   const startBtn = document.getElementById("startBtn");
   const talkBtn = document.getElementById("talkBtn");
-  const downloadBtn = document.getElementById("downloadTranscriptBtn");
   const endSessionBtn = document.querySelector(".end-button");
   const inputArea = document.querySelector(".input-area");
   const timerDisplay = document.querySelector(".time-box");
@@ -199,7 +198,6 @@ document.addEventListener("DOMContentLoaded", () => {
     if (startBtn) startBtn.style.display = "none";
     if (toggleBtn) toggleBtn.style.display = "block";
     if (micBtn) micBtn.style.display = "block";
-    if (downloadBtn) downloadBtn.style.display = "block";
     if (endSessionBtn) endSessionBtn.style.display = "block";
     if (inputArea) inputArea.style.display = "none";
 
@@ -240,19 +238,7 @@ if (endSessionBtn) {
     closeSession();
   });
 }
-  if (downloadBtn) downloadBtn.addEventListener("click", () => {
-    if (!transcriptLog.length) return;
-    const blob = new Blob([JSON.stringify(transcriptLog, null, 2)], {
-      type: "application/json",
-    });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `transcript_${sessionInfo?.session_id || "session"}.json`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-  });
+
 
   async function sendText(text, taskType = "talk") {
     if (!sessionInfo) return;
@@ -306,7 +292,7 @@ document.getElementById("emailForm").addEventListener("submit", async function (
 
 document.getElementById("sentPromptOkBtn").addEventListener("click", function () {
   document.getElementById("sentPromptModal").style.display = "none";
-  window.location.href = "https://www.google.com"; // CHANGE this to your real homepage!
+  window.location.href = "https://punx-agentspace.vercel.app"; // CHANGE this to your real homepage!
 });
 
   async function closeSession() {
@@ -336,7 +322,6 @@ document.getElementById("sentPromptOkBtn").addEventListener("click", function ()
     if (startBtn) startBtn.style.display = "block";
     if (micBtn) micBtn.style.display = "none";
     if (inputArea) inputArea.style.display = "none";
-    if (downloadBtn) downloadBtn.style.display = "none";
     if (endSessionBtn) endSessionBtn.style.display = "none";
     if (toggleBtn) toggleBtn.style.display = "none";
     if (timerDisplay) timerDisplay.textContent = "10:00";
