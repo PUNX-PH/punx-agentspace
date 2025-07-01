@@ -39,7 +39,7 @@ document.addEventListener("DOMContentLoaded", () => {
   document.body.appendChild(loadingOverlay);
 
   let countdownInterval;
-  let remainingTime = 600;
+  let remainingTime = 300;
 
   function startCountdown() {
     if (!timerDisplay) return;
