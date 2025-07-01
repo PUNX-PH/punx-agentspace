@@ -271,6 +271,34 @@ if (endSessionBtn) {
     });
   }
 
+    // Show modal. Call this when session ends!
+    function showEmailModal() {
+    document.getElementById("emailModal").style.display = "flex";
+    }
+
+    // EMAIL FORM SUBMIT ACTION
+    document.getElementById("emailForm").addEventListener("submit", function (e) {
+    e.preventDefault();
+    const email = document.getElementById("pitchEmail").value.trim();
+
+    // --- TODO: integrate with your backend to email the transcript! ---
+    // Example:
+    // await fetch('/api/sendTranscript', {method:"POST",body:JSON.stringify({email,transcript:transcriptLog})})
+    // .then(()=>{show confirmation / close modal})
+
+    alert("Transcript will be sent to " + email); // Replace with real logic
+    document.getElementById("emailModal").style.display = "none";
+    });
+
+    // HOME BUTTON ACTION (customize as needed)
+    document.getElementById("goHomeBtn").addEventListener("click", function () {
+    window.location.href = "www.google.com"; // change URL if your homepage is elsewhere
+    });
+
+    // Example usage: call showEmailModal() when session ends
+    // (replace in your closeSession or wherever you want to trigger it!)
+    // showEmailModal();
+
   async function closeSession() {
     if (!sessionInfo) return;
 
@@ -302,6 +330,8 @@ if (endSessionBtn) {
     if (endSessionBtn) endSessionBtn.style.display = "none";
     if (toggleBtn) toggleBtn.style.display = "none";
     if (timerDisplay) timerDisplay.textContent = "10:00";
+
+    showEmailModal();
   }
 
   // Speech Recognition

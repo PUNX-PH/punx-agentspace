@@ -210,6 +210,46 @@
     <img src="images/end-session-btn.png" alt="End Session Button" />
   </button>
 
+ <!-- Email Modal (hidden by default) -->
+<div id="emailModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-70 z-50" style="display:none;">
+  <div class="bg-[#111133] rounded-3xl p-8 pt-10 pb-8 shadow-2xl max-w-[420px] w-full text-center relative mx-2">
+    <h2 class="text-2xl md:text-3xl font-bold text-white mb-2">Thanks for pitching<br>to the AI Sharks!</h2>
+    <p class="text-white text-lg mb-6">You’ve just taken a bold step into the future of business.</p>
+    <form id="emailForm" class="mb-6">
+      <label class="block text-sm font-semibold text-white mb-2 tracking-wide" for="pitchEmail">
+        ENTER EMAIL TO RECEIVE<br>YOUR PITCH TRANSCRIPT
+      </label>
+      <div class="relative rounded-2xl bg-gradient-to-tr from-purple-600 to-violet-400 p-1">
+        <input
+          id="pitchEmail"
+          name="pitchEmail"
+          type="email"
+          required
+          autocomplete="email"
+          placeholder="ekko@punx.ai"
+          class="w-full h-12 px-5 rounded-xl border-none outline-none text-gray-900 placeholder-gray-400 text-base focus:ring-2 focus:ring-purple-300"
+          style="background:white"
+        />
+        <button
+          type="submit"
+          class="absolute right-2 top-1/2 -translate-y-1/2 flex items-center justify-center w-9 h-9 rounded-xl bg-[#281c8c] hover:bg-[#3d28b0] transition-colors">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#fff" stroke-width="2.5" class="w-6 h-6" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </button>
+      </div>
+    </form>
+    <p class="text-white text-base mb-7 opacity-90">
+      Whether you’re ready to launch<br>or need a little more refining,<br>
+      <span class="font-semibold">your next big idea starts now.</span>
+    </p>
+    <button
+      id="goHomeBtn"
+      class="w-full py-3 bg-gradient-to-r from-[#259dff] to-[#3d6afc] text-white rounded-2xl text-lg font-bold shadow-md hover:from-[#156dcc] hover:to-[#2653ca] transition-colors mt-2">
+      HOME
+      <svg class="inline ml-2 -mt-1 w-5 h-5" fill="none" stroke="#fff" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M13 6l6 6-6 6"/></svg>
+    </button>
+  </div>
+</div>
+
   <!-- JavaScript logic -->
   <script defer src="app.js"></script>
 </body>
