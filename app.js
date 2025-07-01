@@ -306,6 +306,10 @@ document.getElementById("sentPromptOkBtn").addEventListener("click", function ()
   window.location.href = "https://punx-agentspace.vercel.app"; // CHANGE this to your real homepage!
 });
 
+document.getElementById("goHomeBtn").addEventListener("click", function () {
+  window.location.href = "https://punx-agentspace.vercel.app"; 
+});
+
   async function closeSession() {
     if (!sessionInfo) return;
 
