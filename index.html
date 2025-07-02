@@ -8,7 +8,6 @@
     body {
       margin: 0;
       font-family: 'Montserrat', Arial, sans-serif;
-      background: #151e44;
       color: #fff;
       min-height: 100vh;
       overflow-x: hidden;
@@ -19,7 +18,8 @@
       left: 0; top: 0;
       width: 100vw;
       height: 100vh;
-      background: url('YOUR-BACKGROUND-IMAGE.jpg') center/cover no-repeat;
+      /* PUT YOUR BACKGROUND HERE: */
+      background: url('images/bg-main.png') center/cover no-repeat;
       z-index: 10;
       justify-content: center;
       align-items: center;
@@ -202,17 +202,17 @@
 <body>
   <!-- Screen 1: Welcome -->
   <div id="screen1" class="screen active">
-    <img src="YOUR-LOGO-IMAGE.png" alt="Ignite Logo" class="logo" />
+    <img src="images/logo-ignite.png" alt="Ignite Logo" class="logo" />
     <div class="banner">
       <span class="banner-title">SHARKTANK</span>
       <span class="banner-ai">AI</span>
     </div>
-    <img src="YOUR-GROUP-IMAGE.jpg" alt="Sharks Group" class="group-img"/>
+    <img src="images/shark-tank-text.png" alt="Sharks Group" class="group-img"/>
     <button class="main-btn purple-btn" onclick="goToScreen(2)">START</button>
   </div>
   <!-- Screen 2: Welcome to SharkTank AI! -->
   <div id="screen2" class="screen">
-    <img src="YOUR-LOGO-IMAGE.png" alt="Ignite Logo" class="logo" />
+    <img src="images/logo-ignite.png" alt="Ignite Logo" class="logo" />
     <div class="card">
       <h2>Welcome to<br>SharkTank AI!</h2>
       <p>Pitch your idea to AI-powered investor sharks and get instant feedback.</p>
@@ -227,7 +227,7 @@
   </div>
   <!-- Screen 3: Select Shark -->
   <div id="screen3" class="screen">
-    <img src="YOUR-LOGO-IMAGE.png" alt="Ignite Logo" class="logo" />
+    <img src="images/logo-ignite.png" alt="Ignite Logo" class="logo" />
     <div class="card select-shark-card">
       <h2>Select your Shark</h2>
       <div class="slider">
@@ -246,24 +246,24 @@
     </div>
   </div>
   <script>
-    // Shark data (replace image URLs with your own)
+    // Shark data (replace image filenames/paths with your own images!)
     const sharks = [
       {
         name: "Lexi Leap",
         title: "The Innovation Futurist",
-        avatar: "LEXI-AVATAR.jpg",
+        avatar: "images/lexi-avatar-placeholder.jpg",
         desc: "Specialty: Innovation, Tech & Future Trends<br>She’ll question: Tech novelty, uniqueness, and disruptive potential."
       },
       {
         name: "Max Mindset",
         title: "The Strategic Analyst",
-        avatar: "MAX-AVATAR.jpg",
+        avatar: "images/lexi-avatar-placeholder.jpg",
         desc: "Specialty: Business Models & Scalability<br>He’ll evaluate: Revenue model, cost structure, long-term sustainability."
       },
       {
         name: "Vera Velocity",
         title: "The Brand Powerhouse",
-        avatar: "VERA-AVATAR.jpg",
+        avatar: "images/lexi-avatar-placeholder.jpg",
         desc: "Specialty: Go-to-Market Strategy & Branding<br>She’ll challenge: Your product positioning, growth hacks, and launch strategy."
       }
     ];
