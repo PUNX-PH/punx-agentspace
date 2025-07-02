@@ -161,27 +161,31 @@
       cursor: pointer;
     }
 
-    .btn-gradient-violet {
-      background: linear-gradient(90deg, #8b5cf6 0%, #a21caf 100%);
-      color: white;
-      font-weight: bold;
-      border: none;
-      padding: 16px 40px;
-      font-size: 1.3rem;
-      border-radius: 18px;
-      box-shadow: 0 4px 14px 0 rgba(168, 85, 247, 0.24);
-      transition: transform 0.07s, box-shadow 0.2s;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      outline: none;
-    }
+    .btn-gradient-violet-wide {
+    width: 100%;
+    max-width: none;
+    background: linear-gradient(90deg, #8b5cf6 0%, #a21caf 100%);
+    color: #fff;
+    font-weight: bold;
+    border: none;
+    padding: 20px 0;
+    font-size: 1.5rem;
+    border-radius: 20px;
+    box-shadow: 0 4px 24px 0 rgba(168, 85, 247, 0.2);
+    cursor: pointer;
+    text-align: center;
+    margin-top: 30px;
+    margin-bottom: 30px;
+    transition: 
+        transform 0.07s,
+        box-shadow 0.2s;
+    display: block;
+  }
 
-    .btn-gradient-violet:active {
-      transform: scale(0.97);
-      box-shadow: 0 2px 8px 0 rgba(168, 85, 247, 0.34);
-    }
+  .btn-gradient-violet-wide:active {
+    transform: scale(0.98);
+    box-shadow: 0 2px 12px 0 rgba(168, 85, 247, 0.34);
+  }
     .end-button img {
       width: 100%;
       max-width: 240px;
@@ -246,8 +250,8 @@
 
     <div class="controls">
       <div style="padding: 0 18px;">
-        <button id="startBtn" class="btn-gradient-violet-wide">Start Session</button>
-      </div>
+      <button id="startBtn" class="btn-gradient-violet-wide">Start Session</button>
+    </div>
       <button id="micBtn" class="btn-secondary" style="display: none;">🎤 Hold Space to Talk</button>
     </div>
 
