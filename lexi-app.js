@@ -282,7 +282,7 @@ document.getElementById("emailForm").addEventListener("submit", async function (
   }
 
   try {
-    const data = { email: email, transcript: transcriptLog };
+    const data = { email: email , status: "Pending", transcript: transcriptLog };
     const firebaseUrl = "https://punx-shark-tank-default-rtdb.firebaseio.com/transcripts.json";
     const response = await fetch(firebaseUrl, {
       method: "POST",
