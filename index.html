@@ -239,7 +239,12 @@
   </button>
 
 <!-- Email Modal (optimized: padding, portrait responsive) -->
-<form id="emailForm" class="w-full mb-5 md:mb-6 flex flex-col items-center">
+<div id="emailModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-80 z-50 overflow-y-auto" style="display:none;">
+  <div class="bg-[#111133] rounded-[2rem] w-full max-w-[420px] mx-3 my-8 p-7 md:p-10 flex flex-col items-center shadow-2xl text-center
+    border border-[#22224A]" style="min-height:370px;">
+    <h2 class="text-2xl md:text-3xl font-bold text-white mb-1 md:mb-2 leading-tight">Thanks for pitching<br>to the AI Sharks!</h2>
+    <p class="text-white text-base md:text-lg mb-5 md:mb-6 mt-2">You’ve just taken a bold step into the future of business.</p>
+    <form id="emailForm" class="w-full mb-5 md:mb-6 flex flex-col items-center">
   <div class="w-full rounded-[1.5rem] p-[2.5px] bg-gradient-to-tr from-[#b96bff] via-[#7838fa] to-[#4d2acf] mb-3">
     <div class="bg-[#161522] rounded-[1.3rem] w-full h-full py-6 px-4 flex flex-col items-center justify-center">
       <label for="pitchEmail" class="block text-base font-semibold text-white mb-3 tracking-wide text-center w-full">
@@ -252,7 +257,7 @@
           type="email"
           required
           autocomplete="email"
-          placeholder="ekko@punx.ai"
+          placeholder="Enter Email Address"
           class="flex-1 h-14 px-5 rounded-xl text-lg border-none outline-none bg-white text-gray-900 placeholder-[#b9b9b9] font-semibold shadow-md"
           style="max-width: 320px;"
         />
