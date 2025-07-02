@@ -5,201 +5,254 @@
   <title>SharkTank AI Ignite</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    body {
+    html, body {
+      height: 100%;
       margin: 0;
-      font-family: 'Montserrat', Arial, sans-serif;
-      color: #fff;
-      min-height: 100vh;
-      overflow-x: hidden;
-    }
-    .screen {
-      display: none;
-      position: absolute;
-      left: 0; top: 0;
-      width: 100vw;
-      height: 100vh;
-      /* PUT YOUR BACKGROUND HERE: */
-      background: url('images/bg-main.png') center/cover no-repeat;
-      z-index: 10;
-      justify-content: center;
-      align-items: center;
-      flex-direction: column;
-    }
-    .screen.active {
+      padding: 0;
+      background: #0a1236;
+      box-sizing: border-box;
       display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      min-width: 100vw;
+      font-family: 'Montserrat', Arial, sans-serif;
     }
+    .portrait-frame {
+      position: relative;
+      width: 98vw;
+      height: calc(98vw * 16 / 9);
+      max-width: 800px;
+      max-height: 70vh;
+      aspect-ratio: 9/16;
+      background: url('images/bg-main.png') center/cover no-repeat, #112074;
+      border-radius: 34px;
+      box-shadow: 0 20px 70px 0 #000b, 0 4px 68px 0 #653add55;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+    }
+    @media (max-width: 800px), (max-height: 1067px) {
+      .portrait-frame {
+        width: 100vw;
+        height: 100vh;
+        max-width: 100vw;
+        max-height: 100vh;
+        border-radius: 0;
+      }
+    }
+
+    .screen {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      left: 0;
+      top: 0;
+      z-index: 1;
+      display: none;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: center;
+      background: none;
+      padding: 0;
+      color: #fff;  /* Make all text inside screens white */
+    }
+    .screen.active { display: flex; }
+
     .logo {
       width: 170px;
-      margin: 44px auto 14px auto;
-      display: block;
-    }
-    .banner {
-      display: flex;
-      justify-content: center;
-      align-items: center;
+      margin-top: 32px;
       margin-bottom: 22px;
+      display: block;
+      z-index: 10;
+      align-self: center;
+    }
+
+    .banner {
+      width: 94%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 26px;
     }
     .banner-title {
-      background: #1735a7;
-      padding: 8px 25px;
-      border-radius: 7px 0 0 7px;
-      font-size: 2rem;
-      font-weight: bold;
-      letter-spacing: 1.5px;
+      background: #1071e7;
+      padding: 15px 26px 15px 38px;
+      border-radius: 15px 0 0 15px;
+      font-size: 2.1em;
+      font-weight: 700;
+      letter-spacing: 2.5px;
+      color: #fff;
+      text-transform: uppercase;
+      border-right: 2px solid #1071e7;
+      box-shadow: 0 2px 11px #161b3840;
     }
     .banner-ai {
       background: linear-gradient(90deg, #7f57f1 0%, #e24ee5 100%);
-      padding: 8px 25px;
-      border-radius: 0 7px 7px 0;
-      font-size: 2rem;
-      font-weight: bold;
-      margin-left: 2px;
+      border-radius: 0 15px 15px 0;
+      padding: 15px 29px;
+      margin-left: 0;
+      font-size: 2.1em;
+      font-weight: 800;
+      letter-spacing: 2.5px;
+      color: #fff;
+      box-shadow: 0 2px 11px #e24ee590;
+      text-align: center;
     }
+
     .group-img {
-      width: 83vw;
-      max-width: 410px;
-      border-radius: 22px;
-      margin-bottom: 45px;
-      margin-top: 10px;
-      box-shadow: 0 6px 35px rgb(0 0 0 / 28%);
-    }
-    .main-btn {
-      width: 300px;
-      border-radius: 36px;
-      padding: 16px 0;
-      font-size: 1.4rem;
-      font-weight: 600;
-      letter-spacing: 2px;
-      margin: 16px auto;
-      display: block;
-      border: none;
-      cursor: pointer;
-      box-shadow: 0 5px 27px rgba(57, 71, 237, 0.12);
-      transition: background 0.15s, box-shadow 0.13s;
-    }
-    .purple-btn {
-      background: linear-gradient(90deg,#a883fc 10%, #8561f9 95%);
-      color: #fff;
-    }
-    .blue-btn {
-      background: linear-gradient(90deg,#0ca7fe 5%, #3866fd 100%);
-      color: #fff;
-      border: 3.3px solid #fff;
-    }
-    .card {
-      background: #151931f4;
-      border-radius: 32px;
-      padding: 40px 22px 30px 22px;
+      width: 86%;
       max-width: 430px;
-      width: 84vw;
+      border-radius: 25px;
+      margin-bottom: 46px;
+      margin-top: 2px;
+      box-shadow: 0 7px 28px #347aec3c;
+      border: 1.5px solid #dbe1fa36;
+      display: block;
+      align-self: center;
+      object-fit: cover;
+    }
+
+    .main-btn-image {
+      width: 89%;
+      max-width: 370px;
+      border-radius: 50px;
+      box-shadow: 0 7px 30px #6b56f732;
+      background: none;
+      cursor: pointer;
+      border: none;
+      display: block;
+      margin: 0 auto 38px auto;
+      transition: box-shadow 0.13s, transform 0.12s;
+    }
+    .main-btn-image:active { 
+      box-shadow: 0 4px 18px #a68dfc90;
+      opacity: 0.81;
+      transform: scale(0.96);
+    }
+
+    .card {
+      background: #161a30;
+      border-radius: 32px;
+      padding: 38px 18px 28px 18px;
+      max-width: 450px;
+      width: 92%;
       margin: 0 auto;
       box-shadow: 0 9px 60px rgba(8,13,100,0.22);
       text-align: center;
+      color: #fff; /* Make text white in cards */
     }
     .card h2 {
       font-size: 2em;
       font-weight: 700;
       margin-bottom: 22px;
+      color: #fff;  /* Make heading white */
+    }
+    .card p {
+      color: #fff;  /* Make paragraph text white */
     }
     .welcome-list {
       text-align: left;
       margin: 26px 0 36px 0;
       padding: 0;
       list-style: none;
+      color: #fff;  /* Make list items white */
     }
     .welcome-list li {
-      font-size: 1.07em;
-      margin-bottom: 26px;
+      font-size: 1.08em;
+      margin-bottom: 23px;
       position: relative;
-      padding-left: 38px;
+      padding-left: 35px;
+      color: #fff;
     }
     .chk { 
       display: inline-block;
       position: absolute;
       left: 0; top: 6px;
-      width: 23px; height: 23px;
+      width: 20px; height: 20px;
       background: #2e004b;
       border-radius: 50%;
       border: 3.5px solid #ae69fe; 
       box-shadow: 0 2px 8px #8e53ef2e;
     }
+
     .select-shark-card {
-      padding-bottom: 26px;
+      padding-bottom: 18px;
+      color: #fff;
     }
     .slider {
       display: flex;
       align-items: center;
       justify-content: center;
       margin-bottom: 16px;
+      margin-top: 5px;
+      color: #fff;
     }
     .arrow-btn {
-      font-size: 2.2em;
+      font-size: 2.35em;
       color: #ae69fe;
       background: none;
       border: none;
-      padding: 0 12px;
+      padding: 0 13px;
       cursor: pointer;
       user-select: none;
       transition: opacity 0.18s;
     }
     .arrow-btn:active { opacity: 0.7; }
     .avatar-area {
-      margin: 0 18px;
+      margin: 0 8px;
       display: flex; 
       align-items: center; 
       justify-content: center;
     }
     .avatar-img {
-      width: 200px;
-      height: 200px;
+      width: 150px;
+      height: 150px;
       border-radius: 50%;
       object-fit: cover;
-      box-shadow: 0 3px 25px #0006;
+      box-shadow: 0 3px 25px #0005;
       border: 5px solid #2d194b;
       background: #191a35;
     }
     .shark-details {
       margin-top: 12px;
-      margin-bottom: 24px;
+      margin-bottom: 18px;
+      color: #fff;
     }
     .shark-name {
-      font-size: 1.6em;
+      font-size: 1.3em;
       font-weight: 700;
-      margin-bottom: 2px;
+      margin-bottom: 3px;
+      color: #fff;
     }
     .shark-title {
       background: none;
       border: 2px solid #7c6df7;
       border-radius: 9px;
-      font-size: 1.08em;
+      font-size: 1.05em;
       font-weight: 500;
       margin-bottom: 13px;
       color: #fff;
       padding: 5px 14px;
       display: inline-block;
     }
-
-    .main-btn-image {
-      border-radius: 36px;
-      box-shadow: 0 5px 27px rgba(57, 71, 237, 0.12);
-      transition: box-shadow 0.13s;
-    }
-    .main-btn-image:active {
-      opacity: 0.7;
-    }
     .shark-desc {
       font-size: 1.04em;
       color: #dde2ff;
       margin-bottom: 6px;
     }
-    @media (max-width: 480px) {
-      .group-img, .card {
-        width: 97vw;
+
+    @media (max-width: 600px), (max-height: 960px) {
+      .group-img,
+      .card {
+        width: 96vw;
         max-width: 99vw;
-        font-size: 0.99em;
+        font-size: 1em;
       }
-      .main-btn { width: 92vw; font-size: 1.18em; }
-      .avatar-img { width: 135px; height: 135px; }
+      .main-btn-image { width: 90vw; font-size: 1.13em; }
+      .avatar-img { width: 120px; height: 120px; }
     }
     body, html {
       -webkit-overflow-scrolling: touch;
@@ -209,70 +262,70 @@
   </style>
 </head>
 <body>
-  <!-- Screen 1: Welcome -->
-  <div id="screen1" class="screen active">
-  <img src="images/logo-ignite.png" alt="Ignite Logo" class="logo" />
-  <div class="banner">
-    <img src="images/shark-tank-text.png" alt="SharkTank AI Banner" style="width:100%;max-width:350px;display:block;">
-  </div>
-  <img src="images/shark-tank-avatars.jpg" alt="Sharks Group" class="group-img"/>
-  <img 
-    src="images/start-btn.png" 
-    alt="Start" 
-    class="main-btn-image" 
-    onclick="goToScreen(2)" 
-    style="cursor:pointer; width:300px; margin:16px auto; display:block;"
-  >
-</div>
-  <!-- Screen 2: Welcome to SharkTank AI! -->
-  <div id="screen2" class="screen">
-    <img src="images/logo-ignite.png" alt="Ignite Logo" class="logo" />
-    <div class="card">
-      <h2>Welcome to<br>SharkTank AI!</h2>
-      <p>Pitch your idea to AI-powered investor sharks and get instant feedback.</p>
-      <ul class="welcome-list">
-        <li><span class="chk"></span>Pick one of the 3 AI Sharks – each with different personalities and expertise.</li>
-        <li><span class="chk"></span>Click “Start Pitch” to begin your 10-minute session.</li>
-        <li><span class="chk"></span>Speak or type your business idea.</li>
-        <li><span class="chk"></span>Get real-time feedback on what’s strong, what needs work, and if your idea is ready to launch.</li>
-      </ul>
+  <div class="portrait-frame">
+    <!-- Screen 1: Welcome / Home -->
+    <div id="screen1" class="screen active">
+      <img src="images/logo-ignite.png" alt="Ignite Logo" class="logo" />
+      <div class="banner">
+        <div class="banner-title">SHARKTANK</div>
+        <div class="banner-ai">AI</div>
+      </div>
+      <img src="images/shark-tank-avatars.jpg" alt="Sharks Group" class="group-img"/>
       <img 
-      src="images/select-shark.png" 
-      alt="Select Shark" 
-      class="main-btn-image" 
-      onclick="goToScreen(3)" 
-      style="cursor:pointer; width:300px; margin:16px auto; display:block;"
-    >
+        src="images/start-btn.png" 
+        alt="Start" 
+        class="main-btn-image" 
+        onclick="goToScreen(2)"
+      >
     </div>
-  </div>
-  <!-- Screen 3: Select Shark -->
-  <div id="screen3" class="screen">
-    <img src="images/logo-ignite.png" alt="Ignite Logo" class="logo" />
-    <div class="card select-shark-card">
-      <h2>Select your Shark</h2>
-      <div class="slider">
-        <button class="arrow-btn" id="slide-left" onclick="changeShark(-1)">&#x25C0;</button>
-        <div class="avatar-area">
-          <img id="avatar-img" src="" alt="Avatar" class="avatar-img"/>
+    <!-- Screen 2: Welcome/Info -->
+    <div id="screen2" class="screen">
+      <img src="images/logo-ignite.png" alt="Ignite Logo" class="logo" />
+      <div class="card">
+        <h2>Welcome to<br>SharkTank AI!</h2>
+        <p>Pitch your idea to AI-powered investor sharks and get instant feedback.</p>
+        <ul class="welcome-list">
+          <li><span class="chk"></span>Pick one of the 3 AI Sharks – each with different personalities and expertise.</li>
+          <li><span class="chk"></span>Click “Start Pitch” to begin your 10-minute session.</li>
+          <li><span class="chk"></span>Speak or type your business idea.</li>
+          <li><span class="chk"></span>Get real-time feedback on what’s strong, what needs work, and if your idea is ready to launch.</li>
+        </ul>
+        <img 
+          src="images/select-shark.png" 
+          alt="Select Shark" 
+          class="main-btn-image" 
+          onclick="goToScreen(3)"
+        >
+      </div>
+    </div>
+    <!-- Screen 3: Select Shark -->
+    <div id="screen3" class="screen">
+      <img src="images/logo-ignite.png" alt="Ignite Logo" class="logo" />
+      <div class="card select-shark-card">
+        <h2>Select your Shark</h2>
+        <div class="slider">
+          <button class="arrow-btn" id="slide-left" onclick="changeShark(-1)">&#x25C0;</button>
+          <div class="avatar-area">
+            <img id="avatar-img" src="" alt="Avatar" class="avatar-img"/>
+          </div>
+          <button class="arrow-btn" id="slide-right" onclick="changeShark(1)">&#x25B6;</button>
         </div>
-        <button class="arrow-btn" id="slide-right" onclick="changeShark(1)">&#x25B6;</button>
+        <div class="shark-details">
+          <div id="shark-name" class="shark-name"></div>
+          <div id="shark-title" class="shark-title"></div>
+          <div id="shark-desc" class="shark-desc"></div>
+        </div>
+        <img 
+          src="images/start-pitch.png" 
+          alt="Start Pitch" 
+          class="main-btn-image" 
+          onclick="startPitch()" 
+        >
       </div>
-      <div class="shark-details">
-        <div id="shark-name" class="shark-name"></div>
-        <div id="shark-title" class="shark-title"></div>
-        <div id="shark-desc" class="shark-desc"></div>
-      </div>
-      <img 
-      src="images/start-pitch.png" 
-      alt="Start Pitch" 
-      class="main-btn-image" 
-      onclick="startPitch()" 
-      style="cursor:pointer; width:300px; margin:16px auto; display:block;"
-    >
     </div>
   </div>
   <script>
-    // Shark data (replace image filenames/paths with your own images!)
+    // Shark data (replace with your own images)
     const sharks = [
       {
         name: "Lexi Leap",
@@ -311,7 +364,7 @@
       if (num === 3) showShark(0);
     }
     function startPitch() {
-      // Integrate with your Heygen/AI assistant here…
+      // Integrate with Heygen/AI assistant here…
       alert("Starting pitch with " + sharks[sharkIndex].name + " (Plug your AI/Heygen logic here.)");
       // Optionally, show next screen
     }
