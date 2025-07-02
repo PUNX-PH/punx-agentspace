@@ -80,7 +80,9 @@
       display: block;
       border-radius: 10px;
     }
-
+    .video-frame {
+      position: relative;
+    }
     .name {
       font-size: 18px;
       font-weight: bold;
@@ -202,8 +204,10 @@
       <img class="shark-text" src="images/shark-tank-text.png" alt="Shark Tank Text" />
     </div>
     <div class="timer">TIME LEFT <span class="time-box">05:00</span></div>
-    <div class="video-frame">
-      <video id="mediaElement" autoplay playsinline></video>
+    <div class="video-frame relative">
+      <img id="videoPlaceholder" src="images/max-avatar-placeholder.jpg" alt="AI Avatar Placeholder"
+        class="w-full object-cover rounded-lg absolute inset-0 z-10 transition-opacity duration-300" />
+      <video id="mediaElement" autoplay playsinline class="relative z-20"></video>
     </div>
     <div class="name">Max Mindset</div>
     <div class="role">The Strategic Analyst</div>

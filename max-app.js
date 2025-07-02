@@ -212,6 +212,10 @@ document.addEventListener("DOMContentLoaded", () => {
     if (endSessionBtn) endSessionBtn.style.display = "block";
     if (inputArea) inputArea.style.display = "none";
 
+    const videoPlaceholder = document.getElementById("videoPlaceholder");
+    if (videoPlaceholder) videoPlaceholder.style.opacity = '0'; // fades out
+
+    loadingOverlay.style.display = "none";
     startCountdown();
   }
 
