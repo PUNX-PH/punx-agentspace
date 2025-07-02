@@ -341,6 +341,12 @@ document.getElementById("goHomeBtn").addEventListener("click", function () {
     if (toggleBtn) toggleBtn.style.display = "none";
     if (timerDisplay) timerDisplay.textContent = "10:00";
 
+    // HIDE the placeholder image when video is ready (optional fade)
+  const videoPlaceholder = document.getElementById("videoPlaceholder");
+  if (videoPlaceholder) videoPlaceholder.style.opacity = '0'; // fades out
+
+  loadingOverlay.style.display = "none";
+
     showEmailModal();
   }
 

@@ -80,6 +80,9 @@
       display: block;
       border-radius: 10px;
     }
+    .video-frame {
+      position: relative;
+    }
 
     .name {
       font-size: 18px;
@@ -202,9 +205,20 @@
       <img class="shark-text" src="images/shark-tank-text.png" alt="Shark Tank Text" />
     </div>
     <div class="timer">TIME LEFT <span class="time-box">05:00</span></div>
-    <div class="video-frame">
-      <video id="mediaElement" autoplay playsinline></video>
-    </div>
+    <div class="video-frame aspect-[16/9] w-full bg-black rounded-2xl overflow-hidden relative">
+  <img 
+    id="videoPlaceholder"
+    src="images/vera-avatar-placeholder.png"
+    alt="AI Avatar Placeholder"
+    class="absolute inset-0 w-full h-full object-cover object-center z-10 transition-opacity duration-300"
+  />
+  <video
+    id="mediaElement"
+    autoplay
+    playsinline
+    class="absolute inset-0 w-full h-full object-cover object-center z-20"
+  ></video>
+</div>
     <div class="name">Vera Velocity</div>
     <div class="role">The Brand Powerhouse</div>
 
