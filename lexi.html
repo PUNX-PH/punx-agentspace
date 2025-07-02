@@ -161,6 +161,27 @@
       cursor: pointer;
     }
 
+    .btn-gradient-violet {
+      background: linear-gradient(90deg, #8b5cf6 0%, #a21caf 100%);
+      color: white;
+      font-weight: bold;
+      border: none;
+      padding: 16px 40px;
+      font-size: 1.3rem;
+      border-radius: 18px;
+      box-shadow: 0 4px 14px 0 rgba(168, 85, 247, 0.24);
+      transition: transform 0.07s, box-shadow 0.2s;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      outline: none;
+    }
+
+    .btn-gradient-violet:active {
+      transform: scale(0.97);
+      box-shadow: 0 2px 8px 0 rgba(168, 85, 247, 0.34);
+    }
     .end-button img {
       width: 100%;
       max-width: 240px;
@@ -224,7 +245,7 @@
     <div class="role">The Innovation Futurist</div>
 
     <div class="controls">
-      <button id="startBtn" class="btn-primary">▶️ Start</button>
+      <button id="startBtn" class="btn-gradient-violet">Start Session</button>
       <button id="micBtn" class="btn-secondary" style="display: none;">🎤 Hold Space to Talk</button>
     </div>
 
