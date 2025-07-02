@@ -178,6 +178,15 @@
       padding: 5px 14px;
       display: inline-block;
     }
+
+    .main-btn-image {
+      border-radius: 36px;
+      box-shadow: 0 5px 27px rgba(57, 71, 237, 0.12);
+      transition: box-shadow 0.13s;
+    }
+    .main-btn-image:active {
+      opacity: 0.7;
+    }
     .shark-desc {
       font-size: 1.04em;
       color: #dde2ff;
@@ -202,14 +211,19 @@
 <body>
   <!-- Screen 1: Welcome -->
   <div id="screen1" class="screen active">
-    <img src="images/logo-ignite.png" alt="Ignite Logo" class="logo" />
-    <div class="banner">
-      <span class="banner-title">SHARKTANK</span>
-      <span class="banner-ai">AI</span>
-    </div>
-    <img src="images/shark-tank-avatars.jpg" alt="Sharks Group" class="group-img"/>
-    <button class="main-btn purple-btn" onclick="goToScreen(2)">START</button>
+  <img src="images/logo-ignite.png" alt="Ignite Logo" class="logo" />
+  <div class="banner">
+    <img src="images/shark-tank-text.png" alt="SharkTank AI Banner" style="width:100%;max-width:350px;display:block;">
   </div>
+  <img src="images/shark-tank-avatars.jpg" alt="Sharks Group" class="group-img"/>
+  <img 
+    src="images/start-btn.png" 
+    alt="Start" 
+    class="main-btn-image" 
+    onclick="goToScreen(2)" 
+    style="cursor:pointer; width:300px; margin:16px auto; display:block;"
+  >
+</div>
   <!-- Screen 2: Welcome to SharkTank AI! -->
   <div id="screen2" class="screen">
     <img src="images/logo-ignite.png" alt="Ignite Logo" class="logo" />
@@ -222,7 +236,13 @@
         <li><span class="chk"></span>Speak or type your business idea.</li>
         <li><span class="chk"></span>Get real-time feedback on what’s strong, what needs work, and if your idea is ready to launch.</li>
       </ul>
-      <button class="main-btn blue-btn" onclick="goToScreen(3)">SELECT SHARK</button>
+      <img 
+      src="images/select-shark.png" 
+      alt="Select Shark" 
+      class="main-btn-image" 
+      onclick="goToScreen(3)" 
+      style="cursor:pointer; width:300px; margin:16px auto; display:block;"
+    >
     </div>
   </div>
   <!-- Screen 3: Select Shark -->
@@ -242,7 +262,13 @@
         <div id="shark-title" class="shark-title"></div>
         <div id="shark-desc" class="shark-desc"></div>
       </div>
-      <button class="main-btn blue-btn" onclick="startPitch()">START PITCH</button>
+      <img 
+      src="images/start-pitch.png" 
+      alt="Start Pitch" 
+      class="main-btn-image" 
+      onclick="startPitch()" 
+      style="cursor:pointer; width:300px; margin:16px auto; display:block;"
+    >
     </div>
   </div>
   <script>
