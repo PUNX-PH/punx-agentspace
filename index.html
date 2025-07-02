@@ -239,33 +239,36 @@
   </button>
 
 <!-- Email Modal (optimized: padding, portrait responsive) -->
-<div id="emailModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-80 z-50 overflow-y-auto" style="display:none;">
-  <div class="bg-[#111133] rounded-[2rem] w-full max-w-[420px] mx-3 my-8 p-7 md:p-10 flex flex-col items-center shadow-2xl text-center
-    border border-[#22224A]" style="min-height:370px;">
-    <h2 class="text-2xl md:text-3xl font-bold text-white mb-1 md:mb-2 leading-tight">Thanks for pitching<br>to the AI Sharks!</h2>
-    <p class="text-white text-base md:text-lg mb-5 md:mb-6 mt-2">You’ve just taken a bold step into the future of business.</p>
-    <form id="emailForm" class="w-full mb-5 md:mb-6">
-      <label for="pitchEmail" class="block text-xs md:text-sm font-semibold text-white mb-2 tracking-wide text-left pl-1">
-        ENTER EMAIL TO RECEIVE YOUR PITCH TRANSCRIPT
+<form id="emailForm" class="w-full mb-5 md:mb-6 flex flex-col items-center">
+  <div class="w-full rounded-[1.5rem] p-[2.5px] bg-gradient-to-tr from-[#b96bff] via-[#7838fa] to-[#4d2acf] mb-3">
+    <div class="bg-[#161522] rounded-[1.3rem] w-full h-full py-6 px-4 flex flex-col items-center justify-center">
+      <label for="pitchEmail" class="block text-base font-semibold text-white mb-3 tracking-wide text-center w-full">
+        ENTER EMAIL TO RECEIVE<br>YOUR PITCH TRANSCRIPT
       </label>
-      <div class="relative rounded-xl bg-gradient-to-tr from-purple-600 to-violet-400 p-1 flex-1">
+      <div class="flex items-center w-full justify-center">
         <input
           id="pitchEmail"
           name="pitchEmail"
           type="email"
           required
           autocomplete="email"
-          placeholder="Enter Email Address"
-          class="w-full h-12 px-4 rounded-lg border-none outline-none text-gray-900 placeholder-gray-400 text-base focus:ring-2 focus:ring-purple-300 bg-white"
+          placeholder="ekko@punx.ai"
+          class="flex-1 h-14 px-5 rounded-xl text-lg border-none outline-none bg-white text-gray-900 placeholder-[#b9b9b9] font-semibold shadow-md"
+          style="max-width: 320px;"
         />
         <button
           type="submit"
           aria-label="Submit Email"
-          class="absolute right-1.5 top-1/2 -translate-y-1/2 flex items-center justify-center w-9 h-9 rounded-xl bg-[#281c8c] hover:bg-[#3d28b0] transition-colors">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#fff" stroke-width="2.5" class="w-6 h-6" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M13 6l6 6-6 6"/></svg>
+          class="ml-[-45px] flex items-center justify-center w-11 h-11 rounded-xl bg-gradient-to-br from-[#259dff] to-[#3d6afc] hover:from-[#156dcc] hover:to-[#2653ca] shadow-md border-4 border-white"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#fff" stroke-width="2.5" class="w-6 h-6" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M13 6l6 6-6 6"/>
+          </svg>
         </button>
       </div>
-    </form>
+    </div>
+  </div>
+</form>
     <p class="text-white text-[15px] md:text-base mb-6 md:mb-8 opacity-90 px-2">
       Whether you’re ready to launch<br>or need a little more refining,<br>
       <span class="font-semibold">your next big idea starts now.</span>
