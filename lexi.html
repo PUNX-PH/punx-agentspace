@@ -191,6 +191,11 @@
       width: 100%;
       max-width: 240px;
     }
+    .email-box{
+      max-width: 80%;
+      width: 100%;
+      margin: auto;
+    }
 
     @media (max-width: 480px) {
       .container {
@@ -283,14 +288,14 @@
 
 <!-- Email Modal (optimized: padding, portrait responsive) -->
 <div id="emailModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-80 z-50 overflow-y-auto" style="display:none;">
-  <div class="bg-[#111133] rounded-[2rem] w-full max-w-[420px] mx-3 my-8 p-7 md:p-10 flex flex-col items-center shadow-2xl text-center
-    border border-[#22224A]" style="min-height:370px;">
-    <h2 class="text-2xl md:text-3xl font-bold text-white mb-1 md:mb-2 leading-tight">Thanks for pitching<br>to the AI Sharks!</h2>
-    <p class="text-white text-base md:text-lg mb-5 md:mb-6 mt-2">You’ve just taken a bold step into the future of business.</p>
+  <div class="email-box bg-[#111133] rounded-[2rem] w-full max-w-[420px] mx-3 my-8 p-7 md:p-10 flex flex-col items-center shadow-2xl text-center
+    border border-[#22224A]" style="min-height:370px;max-width: 80%;width: 100%;">
+    <h2 style="font-size: 36px;line-height: 46px;" class="text-2xl md:text-3xl font-bold text-white mb-1 md:mb-2 leading-tight" >Thanks for pitching<br>to the AI Sharks!</h2>
+    <p style="font-size: 30px;line-height: 40px;"  class="text-white text-base md:text-lg mb-5 md:mb-6 mt-2">You’ve just taken a bold step into the future of business.</p>
     <form id="emailForm" class="w-full mb-5 md:mb-6 flex flex-col items-center">
   <div class="w-full rounded-[2rem] p-6 flex flex-col items-center mb-3"
   style="background: url('images/violet-gradient.png') center center/cover no-repeat;">
-      <label for="pitchEmail" class="block text-base font-semibold text-white mb-3 tracking-wide text-center w-full">
+      <label for="pitchEmail" style="font-size: 30px;line-height: 40px;" class="block text-base font-semibold text-white mb-3 tracking-wide text-center w-full">
         ENTER EMAIL TO RECEIVE<br>YOUR PITCH TRANSCRIPT
       </label>
       <div class="flex items-center w-full justify-center">
@@ -302,7 +307,7 @@
           autocomplete="email"
           placeholder="Enter Email Address"
           class="flex-1 h-14 px-5 rounded-xl text-lg border-none outline-none bg-white text-gray-900 placeholder-[#b9b9b9] font-semibold shadow-md"
-          style="max-width: 320px;"
+          style="max-width: 420px; font-size: 26px;height: 70px;"
         />
         <button
           type="submit"
@@ -317,12 +322,12 @@
 
   </div>
 </form>
-    <p class="text-white text-[15px] md:text-base mb-6 md:mb-8 opacity-90 px-2">
+    <p style="font-size: 30px;line-height: 40px;" class="text-white text-[15px] md:text-base mb-6 md:mb-8 opacity-90 px-2">
       Whether you’re ready to launch<br>or need a little more refining,<br>
       <span class="font-semibold">your next big idea starts now.</span>
     </p>
    <button id="goHomeBtn" class="w-full">
-      <img src="images/home-btn.png" alt="HOME Button" class="w-full max-w-[230px] mx-auto" />
+      <img src="images/home-btn.png" alt="HOME Button" class="w-full max-w-[330px] mx-auto" />
     </button>
   </div>
 </div>
