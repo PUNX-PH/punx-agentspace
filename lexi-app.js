@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
   const API_CONFIG = {
-    apiKey: "ZmVjNDdmZDM5NmYwNGRmMmE5NTcyYjQ1YzA1YjNiY2EtMTc1MDc2NTYwMg==",
+    apiKey: "ZmVjNDdmZDM5NmYwNGRmMmE5NTcyYjQ1YzA1YjNiY2EtMTc1ODYyOTMxOQ==",
     serverUrl: "https://api.heygen.com",
   };
 
