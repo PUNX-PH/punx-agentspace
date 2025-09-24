@@ -74,6 +74,8 @@ document.addEventListener("DOMContentLoaded", () => {
       },
     });
     const data = await response.json();
+    console.log("token: "+ data.data.token);
+  
     sessionToken = data.data.token;
   }
 
