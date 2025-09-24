@@ -137,6 +137,16 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     const data = await response.json();
+
+     // Defensive coding - check HTTP status and returned data
+  if (!response.ok || !data.data) {
+    loadingOverlay.style.display = "none";
+    // Log error output for debugging
+    console.error("Failed to create HeyGen session.", data);
+    alert("Session start failed: " + (data.error || data.message || JSON.stringify(data)));
+    return;
+  }
+  
     sessionInfo = data.data;
 
     room = new LivekitClient.Room({
