@@ -129,7 +129,7 @@ document.addEventListener("DOMContentLoaded", () => {
       },
       body: JSON.stringify({
         quality: "high",
-        avatar_name: "Marianne_Black_Suit_public",
+        avatar_name: "Marianne_Chair_Sitting_public",
         version: "v2",
         video_encoding: "H264",
         knowledge_base: heygenKnowledge
