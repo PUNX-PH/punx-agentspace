@@ -2,248 +2,353 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>AI Wedding Coordinator</title>
-  <!-- Tailwind CSS for simple responsive utilities -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Shark Tank AI</title>
+
+  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&display=swap">
+
+  <!-- LiveKit Client UMD -->
+  <script src="https://cdn.jsdelivr.net/npm/livekit-client/dist/livekit-client.umd.min.js"></script>
+
   <style>
     body {
-      min-height: 100vh;
       margin: 0;
-      background: url('images/bg-silver-luxe.jpg') no-repeat center center fixed;
+      font-family: Arial, sans-serif;
+      background: url('images/bg-main.png') no-repeat center center fixed;
       background-size: cover;
-      font-family: 'Playfair Display', 'Serif', Arial, sans-serif !important;
       display: flex;
+      flex-direction: column;
       align-items: center;
-      justify-content: center;
-      position:relative;
-      overflow-x: hidden;
+       justify-content: center;
+      padding: 20px;
+      min-height: 100vh;
     }
-    .gold-card {
-      background: linear-gradient(180deg, #f5f6fb 80%, #e6e6eb 100%);
-      border-radius: 2rem;
-      box-shadow: 0px 12px 48px 0px rgba(32,32,69,0.10), 0 0 0 8px #eee7f2;
-      border: 2px solid #f5e9d6;
-      padding: 2.3rem 1.2rem 1.2rem;
+
+    .container {
+      background-color: #0d0d25;
+      border-radius: 20px;
+      padding: 24px 20px;
       width: 100%;
-      max-width: 380px;
-      text-align:center;
-      position:relative;
-      z-index: 2;
+      max-width: 400px;
+      color: white;
+      text-align: center;
     }
-    .fancy-title {
-      font-family: 'Playfair Display', 'Serif', Arial, sans-serif !important;
-      font-size: 2rem;
-      font-weight: 700;
-      background: linear-gradient(92deg,#ad9987,#d8b45c 40%,#b8a274 70%,#927e64);
-      color:transparent;
-      -webkit-background-clip:text;
-      background-clip:text;
-      letter-spacing:0.5px;
-      /* subtle drop shadow for elegance */
-      text-shadow: 0 2px 7px rgba(187,155,60,0.14);
-      margin-bottom:10px;
+
+    .logo {
+      width: auto;
+      margin: 0 auto 10px;
     }
-    .timer-label {
-      color: #968045;
-      letter-spacing:1px;
-      font-size: 1.02rem;
-      font-weight: 600;
-      text-shadow:0 1px 3px rgba(187,155,60,0.06);
-      margin-top: 8px;
+
+    .shark-tank-header {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
     }
-    .timer-box {
-      display:inline-block;
-      padding: 6px 20px;
-      border-radius:9px;
-      font-weight: 700;
-      font-size: 1.3rem;
-      margin-left: 0.45rem;
-      background: linear-gradient(90deg,#eece87,#bda067 70%);
-      color: #473d13;
-      box-shadow:0 2.5px 14px 0 rgba(142, 122, 48, 0.08);
-      border: 1px solid #bda067;
+
+    .shark-text {
+      width: auto;
     }
-    .profile-frame {
-      margin: 24px auto 20px;
-      border-radius: 1rem;
+
+    .ai-box {
+      width: 40px;
+    }
+
+    .timer {
+      font-size: 34px;
+      margin-bottom: 10px;
+    }
+
+    .time-box {
+      display: inline-block;
+      background: #a020f0;
+      padding: 5px 10px;
+      border-radius: 10px;
+      font-weight: bold;
+      font-size: 34px;
+    }
+
+    .video-frame {
+      margin: 15px 0;
+      border-radius: 10px;
       overflow: hidden;
-      background: linear-gradient(white, #f5ebda 95%);
-      border: 3px solid #e2d1a8;
-      box-shadow:0 3px 12px 0 rgba(193,177,103,0.09);
-      position:relative;
+    }
+
+    .video-frame video {
       width: 100%;
-      max-width: 310px;
-      aspect-ratio: 4/3;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-    }
-    .profile-frame img,
-    .profile-frame video {
-      width: 100%;
-      height: 100%;
-      object-fit:cover;
-      display:block;
-      border-radius: 1rem;
-      transition: filter 0.38s;
-    }
-    .profile-frame video {
-      position:absolute;
-      inset:0;
-      z-index:2;
-      background:transparent;
-    }
-    .profile-frame img {
-      z-index:1;
-    }
-    /* Optional: little chat/end icon bar on frame bottom-left/right */
-    .frame-bar {
-      position: absolute;
-      left: 12px;
-      right: 12px;
-      bottom: 10px;
-      display: flex;
-      justify-content: space-between;
-      z-index: 10;
-    }
-    .frame-btn {
-      font-size: 0.95rem;
-      background:rgba(255,255,255,0.66);
-      color:#675622;
-      border-radius:0.6em;
-      padding: 0.25em 0.7em;
-      font-weight:600;
-      display:flex;
-      gap:0.22em;
-      align-items:center;
-      border: none;
-      outline: none;
-      min-width: 1.8em;
-      box-shadow: 0 2px 8px rgba(157,137,77,0.05);
-      transition: background 0.16s;
-    }
-    .frame-btn-end {
-      background:#f37f7f !important;
-      color:#fff;
-    }
-    .name {
-      font-family: 'Playfair Display', 'Serif', Arial, sans-serif;
-      font-size: 1.55rem;
-      color: #1b1826;
-      font-weight: 700;
-      margin-bottom: 0.15em;
-      margin-top: 4px;
-      letter-spacing: 0.2px;
-      text-shadow: 0 2px 5px rgba(187,155,60,0.09);
-    }
-    .role {
-      font-size: 1.11rem;
-      background: linear-gradient(90deg,#bba067,#e7e1ce 55%,#bba067 95%);
-      color: #877742;
-      font-weight:600;
-      border-radius: 0.8em;
-      padding: 5px 1em 4px 1em;
-      margin-bottom: 18px;
-      max-width:90%;
-      margin-left:auto;margin-right:auto;
-    }
-    .end-session-btn {
-      width:100%;
       display: block;
-      margin:28px 0 16px 0;
-      font-size: 1.37rem;
-      padding: 17px 0 14px 0;
-      border-radius: 1.1rem;
-      font-weight: 700;
-      letter-spacing: 0.3px;
-      background: linear-gradient(90deg, #d1ad66 2%, #ffefaf 51%, #c0a551 99%);
-      box-shadow: 0 3px 16px 0 rgba(122, 98, 17, 0.11);
-      color:#574620;
-      border: 2px solid #d5b76f;
-      cursor:pointer;
-      transition: background 0.13s, box-shadow 0.18s;
+      border-radius: 10px;
     }
-    .end-session-btn:hover {
-      background: linear-gradient(94deg, #e8c771 10%, #ffe582 67%, #d2b16a 99%);
-      color:#392f15;
-      box-shadow: 0 5px 16px 0 rgba(235,215,111,0.32);
+
+    .video-frame {
+    position: relative;
+  }
+
+    .name {
+      font-size: 36px;
+      font-weight: bold;
+      margin: 10px 0 5px;
     }
-    .powered {
-      margin-top: 1.7em;
-      font-size:0.88rem;
-      color:#8b8869;
-      letter-spacing:0.18em;
-      opacity:0.84;
-      font-weight: 600;
+
+    .role {
+      font-size: 30px;
+      color: #ccc;
+      margin-bottom: 10px;
+    }
+
+    .controls {
+      margin-top: 10px;
+    }
+
+    .controls button {
+      margin: 5px 0;
+      padding: 10px;
+      width: 100%;
+      border-radius: 8px;
+      font-weight: bold;
+      font-size: 30px;
+      cursor: pointer;
+    }
+
+    .btn-primary {
+      background-color: #4ade80;
+      color: #111827;
+    }
+
+    .btn-primary:hover {
+      background-color: #22c55e;
+    }
+
+    .btn-secondary {
+      background-color: #60a5fa;
+      color: #111827;
+    }
+
+    .btn-secondary:hover {
+      background-color: #3b82f6;
+    }
+
+    .btn-danger {
+      background-color: #f87171;
+      color: #111827;
+    }
+
+    .btn-danger:hover {
+      background-color: #ef4444;
+    }
+
+    .input-area {
       display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.4em;
-      user-select: none;
+      gap: 10px;
+      margin-top: 10px;
     }
-    .powered img {
-      height: 1.45em;
-      margin-left:0.4em;
-      opacity:0.91;
-      vertical-align: middle;
+
+    .input-area input {
+      flex: 1;
+      padding: 10px;
+      border-radius: 6px;
+      border: 1px solid #333;
+      background-color: #1a1a2e;
+      color: white;
     }
-    /* GOLD LEAF deco left/right optional: 
-    .gold-leaf{ position:absolute;top:0;width:42px;z-index:1;}
-    .gold-leaf.left{left:-27px;}
-    .gold-leaf.right{right:-27px;transform:scaleX(-1);}
-    */
-    @media (max-width:600px){
-      .gold-card{max-width:99vw;padding:1.3rem 0.1rem;}
-      .profile-frame{max-width:95vw;}
+
+    .end-button {
+      margin-top: 20px;
+      background: none;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+    }
+
+    .btn-gradient-violet-wide {
+    width: 100%;
+    max-width: none;
+    background: linear-gradient(90deg, #8b5cf6 0%, #a21caf 100%);
+    color: #fff;
+    font-weight: bold;
+    border: none;
+    padding: 20px 0;
+    font-size: 1.5rem;
+    border-radius: 20px;
+    box-shadow: 0 4px 24px 0 rgba(168, 85, 247, 0.2);
+    cursor: pointer;
+    text-align: center;
+    margin-top: 30px;
+    margin-bottom: 30px;
+    transition: 
+        transform 0.07s,
+        box-shadow 0.2s;
+    display: block;
+  }
+
+  .btn-gradient-violet-wide:active {
+    transform: scale(0.98);
+    box-shadow: 0 2px 12px 0 rgba(168, 85, 247, 0.34);
+  }
+    .end-button img {
+      width: 100%;
+      max-width: 240px;
+    }
+    .email-box{
+      max-width: 80%;
+      width: 100%;
+      margin: auto;
+    }
+
+    @media (max-width: 480px) {
+      .container {
+        padding: 20px 16px;
+      }
+
+      .shark-text {
+        width: 160px;
+      }
+
+      .logo {
+        width: 120px;
+      }
+
+      .end-button img {
+        max-width: 200px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      #emailModal > div {
+        padding: 1.5rem !important;
+        max-width: 98vw;
+        border-radius: 1.2rem !important;
+        min-height: 340px;
+        font-size: 90%;
+      }
+      #emailModal input[type="email"] {
+        height: 44px !important;
+        font-size: 15px !important;
+      }
     }
   </style>
 </head>
 <body>
-  <!-- Gold Leaf Decor Optional
-  <img src="images/gold-leaf.png" alt="" class="gold-leaf left" />
-  <img src="images/gold-leaf.png" alt="" class="gold-leaf right" />
-  -->
-  <div class="gold-card">
-
-    <div class="fancy-title">AI Wedding Coordinator</div>
-    <div class="timer-label">
-      TIME LEFT
-      <span class="timer-box" id="timerBox">4:36</span>
+  <div class="container">
+    <img class="logo" src="images/logo-ignite.png" alt="Ignite Logo" />
+    <div class="shark-tank-header">
+      <img class="shark-text" src="images/shark-tank-text.png" alt="Shark Tank Text" />
     </div>
-    <div class="profile-frame">
-      <img src="images/amara.jpg" alt="Amara, Wedding AI" id="profilePlaceholder" />
-      <!-- For possible live video overlay: -->
-      <video id="profileVideo" autoplay playsinline muted style="display:none;"></video>
-      <!-- Frame buttons (optional, like "Let's chat"/"End Chat") -->
-      <div class="frame-bar">
-        <button class="frame-btn">💬  Let's chat</button>
-        <button class="frame-btn frame-btn-end">End Chat</button>
-      </div>
-    </div>
+    <div class="timer">TIME LEFT <span class="time-box">05:00</span></div>
+    <div class="video-frame aspect-[16/9] w-full bg-black rounded-2xl overflow-hidden relative">
+  <img 
+    id="videoPlaceholder"
+    src="images/lexi-avatar-placeholder1.jpg"
+    alt="AI Avatar Placeholder"
+    class="absolute inset-0 w-full h-full object-cover object-center z-10 transition-opacity duration-300"
+  />
+  <video
+    id="mediaElement"
+    autoplay
+    playsinline
+    class="absolute inset-0 w-full h-full object-cover object-center z-20"
+  ></video>
+</div>
     <div class="name">Amara</div>
-    <div class="role">PLAI’s Wedding Agent</div>
-    <button class="end-session-btn" id="endSessionBtn">End Session</button>
-    <div class="powered">
-      POWERED BY
-      <img src="images/plai-logo.png" alt="PLAI Logo"/>
+    <div class="role">PLAI Wedding AI Agent</div>
+
+    <div class="controls">
+      <div style="padding: 0 18px;">
+      <button id="startBtn" class="btn-gradient-violet-wide">Start Session</button>
     </div>
+      <button id="micBtn" class="btn-secondary" style="display: none;">🎤 Hold Space to Talk</button>
+    </div>
+
+    <div class="input-area flex gap-2 mt-3">
+  <input
+    id="taskInput"
+    type="text"
+    placeholder="Type something..."
+    class="flex-1 px-4 py-2 rounded-lg border border-gray-700 bg-[#1a1a2e] text-white focus:outline-none focus:ring-2 focus:ring-purple-400"
+  />
+  <button
+    id="talkBtn"
+    type="button"
+    aria-label="Send Message"
+    class="bg-gradient-to-r from-purple-600 to-blue-500 hover:from-purple-800 hover:to-blue-600 transition-colors 
+      rounded-full w-11 h-11 flex items-center justify-center shadow-lg focus:outline-none focus:ring-2 focus:ring-purple-400"
+  >
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="white" stroke-width="2.5" class="w-6 h-6" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M13 6l6 6-6 6"/>
+    </svg>
+  </button>
+</div>
+</div>
+
+  <button class="end-button" style="display: none;">
+    <img src="images/end-session-btn.png" alt="End Session Button" />
+  </button>
+
+<!-- Email Modal (optimized: padding, portrait responsive) -->
+<div id="emailModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-80 z-50 overflow-y-auto" style="display:none;">
+  <div class="email-box bg-[#111133] rounded-[2rem] w-full max-w-[420px] mx-3 my-8 p-7 md:p-10 flex flex-col items-center shadow-2xl text-center
+    border border-[#22224A]" style="min-height:370px;max-width: 80%;width: 100%;">
+    <h2 style="font-size: 36px;line-height: 46px;" class="text-2xl md:text-3xl font-bold text-white mb-1 md:mb-2 leading-tight" >Thanks for pitching<br>to the AI Sharks!</h2>
+    <p style="font-size: 30px;line-height: 40px;"  class="text-white text-base md:text-lg mb-5 md:mb-6 mt-2">You’ve just taken a bold step into the future of business.</p>
+    <form id="emailForm" class="w-full mb-5 md:mb-6 flex flex-col items-center">
+  <div class="w-full rounded-[2rem] p-6 flex flex-col items-center mb-3"
+  style="background: url('images/violet-gradient.png') center center/cover no-repeat;">
+      <label for="pitchEmail" style="font-size: 30px;line-height: 40px;" class="block text-base font-semibold text-white mb-3 tracking-wide text-center w-full">
+        ENTER EMAIL TO RECEIVE<br>YOUR PITCH TRANSCRIPT
+      </label>
+      <div class="flex items-center w-full justify-center">
+        <input
+          id="pitchEmail"
+          name="pitchEmail"
+          type="email"
+          required
+          autocomplete="email"
+          placeholder="Enter Email Address"
+          class="flex-1 h-14 px-5 rounded-xl text-lg border-none outline-none bg-white text-gray-900 placeholder-[#b9b9b9] font-semibold shadow-md"
+          style="max-width: 420px; font-size: 26px;height: 70px;"
+        />
+        <button
+          type="submit"
+          aria-label="Submit Email"
+          class="ml-[-45px] flex items-center justify-center w-11 h-11 rounded-xl bg-gradient-to-br from-[#259dff] to-[#3d6afc] hover:from-[#156dcc] hover:to-[#2653ca] shadow-md border-4 border-white"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#fff" stroke-width="2.5" class="w-6 h-6" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M13 6l6 6-6 6"/>
+          </svg>
+        </button>
+      </div>
+
   </div>
-  <!-- Optionally insert your JS below -->
-  <script>
-    // Timer logic (4:36 start)
-    let time = 4 * 60 + 36, timerBox = document.getElementById('timerBox');
-    setInterval(() => {
-      if (time <= 0) return;
-      time--;
-      let mins = Math.floor(time/60).toString();
-      let secs = (time%60).toString().padStart(2,'0');
-      timerBox.textContent = `${mins}:${secs}`;
-    }, 1000);
-    // End session button logic (demo)
-    document.getElementById('endSessionBtn').onclick = () => alert("Thank you for using Amara – PLAI's Wedding AI Agent!");
-  </script>
+</form>
+    <p style="font-size: 30px;line-height: 40px;" class="text-white text-[15px] md:text-base mb-6 md:mb-8 opacity-90 px-2">
+      Whether you’re ready to launch<br>or need a little more refining,<br>
+      <span class="font-semibold">your next big idea starts now.</span>
+    </p>
+   <button id="goHomeBtn" class="w-full">
+      <img src="images/home-btn.png" alt="HOME Button" class="w-full max-w-[330px] mx-auto" />
+    </button>
+  </div>
+</div>
+
+<!-- Processing Prompt Modal -->
+<div id="sentPromptModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-80 z-50" style="display:none;">
+  <div class="bg-[#18183d] border border-[#342282] rounded-2xl px-8 py-8 shadow-2xl flex flex-col items-center max-w-[350px] text-center">
+    <div class="text-3xl mb-4 text-indigo-400">📨</div>
+    <div class="text-white text-xl font-extrabold mb-2">Transcript in Process</div>
+    <div class="text-violet-200 mb-5 text-base leading-snug">
+      Your transcript is being processed<br>and will be sent to your email soon!
+    </div>
+    <button id="sentPromptOkBtn"
+      class="w-full py-3 rounded-2xl font-bold text-lg bg-gradient-to-r from-[#259dff] to-[#6f39fb] text-white shadow-md hover:from-[#156dcc] hover:to-[#3d28b0] transition-colors flex justify-center items-center gap-2">
+      OK
+    </button>
+  </div>
+</div>
+
+
+  <!-- JavaScript logic -->
+  <script defer src="lexi-app.js"></script>
 </body>
 </html>
