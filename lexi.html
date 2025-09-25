@@ -2,311 +2,287 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Shark Tank AI</title>
+  <meta name="viewport" content="width=768, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>AI Wedding Concierge</title>
 
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
-
-  <!-- LiveKit Client UMD -->
-  <script src="https://cdn.jsdelivr.net/npm/livekit-client/dist/livekit-client.umd.min.js"></script>
-
   <style>
-    body {
+    html, body {
+      height: 100%;
+      padding: 0;
       margin: 0;
+      background: #bfc0c7;
       font-family: Arial, sans-serif;
-      background: url('images/bg-main.png') no-repeat center center fixed;
-      background-size: cover;
+      min-height: 100vh;
+      min-width: 100vw;
+      box-sizing: border-box;
+      overflow-x: hidden;
       display: flex;
       flex-direction: column;
       align-items: center;
-       justify-content: center;
-      padding: 20px;
-      min-height: 100vh;
-    }
-
-    .container {
-      background-color: #0d0d25;
-      border-radius: 20px;
-      padding: 24px 20px;
-      width: 100%;
-      max-width: 400px;
-      color: white;
-      text-align: center;
-    }
-
-    .logo {
-      width: auto;
-      margin: 0 auto 10px;
-    }
-
-    .shark-tank-header {
-      display: flex;
       justify-content: center;
+    }
+    body {
+      /* fallback for glass reflection BG */
+      padding: 30px 0;
+      min-height: 100vh;
+      min-width: 100vw;
+      display: flex;
+      flex-direction: column;
       align-items: center;
-      gap: 8px;
-      margin-bottom: 10px;
+      justify-content: center;
     }
 
-    .shark-text {
-      width: auto;
+    .s3-container {
+      background: url('images/s3-container.png') center center/cover no-repeat;
+      width: 768px;
+      height: 1334px;
+      border-radius: 32px;
+      color: #23212b;
+      text-align: center;
+      box-shadow: 0 6px 46px 0 rgba(62, 66, 130, 0.16);
+
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      overflow: hidden;
+      padding: 46px 38px 36px 38px;
+      box-sizing: border-box;
+      position: relative;
     }
 
-    .ai-box {
-      width: 40px;
+    .s3-container > * {
+      width: 100%;
+      max-width: 100%;
+      box-sizing: border-box;
     }
-
+    .ai-heading {
+      margin-bottom: 8px;
+      font-size: 3.2rem;
+      font-family: 'Georgia', serif;
+      font-weight: bold;
+      color: #BA990E;
+      letter-spacing: 1px;
+      text-shadow: 0 0 6px #fff3, 0 1px 0 #b993, 0 4px 14px #fff9;
+      line-height: 1;
+      text-align: center;
+      /* If multiline needed on smaller screens */
+      hyphens: auto;
+      word-break: break-word;
+    }
     .timer {
-      font-size: 34px;
-      margin-bottom: 10px;
+      font-size: 1.48rem;
+      margin-top: 22px;
+      margin-bottom: 22px;
+      font-weight: 500;
+      letter-spacing: 1px;
+      color: #23212b;
     }
-
     .time-box {
       display: inline-block;
       background: #a020f0;
-      padding: 5px 10px;
+      padding: 4px 18px;
       border-radius: 10px;
       font-weight: bold;
-      font-size: 34px;
+      font-size: 1.6rem;
+      color: white;
+      margin-left: 8px;
+      line-height: 1;
     }
-
     .video-frame {
-      margin: 15px 0;
-      border-radius: 10px;
+      margin: 0 auto 18px auto;
+      width: 100%;
+      max-width: 685px;
+      aspect-ratio: 16/9;
+      border-radius: 18px;
       overflow: hidden;
-    }
-
-    .video-frame video {
-      width: 100%;
+      background: #222;
+      position: relative;
       display: block;
-      border-radius: 10px;
+      min-height: 265px;
     }
-
-    .video-frame {
-    position: relative;
-  }
-
-    .name {
-      font-size: 36px;
-      font-weight: bold;
-      margin: 10px 0 5px;
-    }
-
-    .role {
-      font-size: 30px;
-      color: #ccc;
-      margin-bottom: 10px;
-    }
-
-    .controls {
-      margin-top: 10px;
-    }
-
-    .controls button {
-      margin: 5px 0;
-      padding: 10px;
+    .video-frame img,
+    .video-frame video {
+      position: absolute;
+      inset: 0;
       width: 100%;
-      border-radius: 8px;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+      border-radius: 18px;
+      display: block;
+    }
+    .name {
+      font-size: 2.1rem;
       font-weight: bold;
-      font-size: 30px;
+      margin: 19px 0 12px 0;
+      color: #23212b;
+    }
+    .role {
+      font-size: 1.35rem;
+      color: #818087;
+      margin-bottom: 25px;
+    }
+    .controls {
+      width: 100%;
+      margin-top: 6px;
+      margin-bottom: 14px;
+    }
+    .controls > * {
+      margin-top: 8px;
+      margin-bottom: 8px;
+    }
+    .btn-gradient-violet-wide {
+      width: 100%;
+      background: linear-gradient(90deg, #8b5cf6 0%, #a21caf 100%);
+      color: #fff !important;
+      font-weight: bold;
+      border: none;
+      padding: 18px 0;
+      font-size: 1.2rem;
+      border-radius: 14px;
+      box-shadow: 0 4px 24px 0 rgba(168, 85, 247, 0.18);
       cursor: pointer;
+      text-align: center;
+      margin-bottom: 10px;
+      transition: 
+        transform 0.07s,
+        box-shadow 0.2s;
+      display: block;
     }
-
-    .btn-primary {
-      background-color: #4ade80;
-      color: #111827;
+    .btn-gradient-violet-wide:active {
+      transform: scale(0.97);
+      box-shadow: 0 2px 12px 0 rgba(168, 85, 247, 0.23);
     }
-
-    .btn-primary:hover {
-      background-color: #22c55e;
-    }
-
     .btn-secondary {
       background-color: #60a5fa;
+      color: #111827 !important;
+      width: 100%;
+      border-radius: 12px;
+      font-weight: bold;
+      font-size: 1rem;
+      padding: 11px 0;
+      transition: .16s;
       color: #111827;
+      margin-bottom: 0;
+      margin-top: 0;
     }
-
     .btn-secondary:hover {
       background-color: #3b82f6;
     }
-
-    .btn-danger {
-      background-color: #f87171;
-      color: #111827;
-    }
-
-    .btn-danger:hover {
-      background-color: #ef4444;
-    }
-
     .input-area {
       display: flex;
-      gap: 10px;
-      margin-top: 10px;
+      gap: 12px;
+      margin-top: 16px;
+      width: 100%;
+      align-items: center;
+      justify-content: center;
     }
-
     .input-area input {
       flex: 1;
-      padding: 10px;
-      border-radius: 6px;
-      border: 1px solid #333;
-      background-color: #1a1a2e;
-      color: white;
+      padding: 13px 14px;
+      border-radius: 10px;
+      border: 1px solid #A4A2B6;
+      background-color: #fafaff;
+      color: #222243;
+      font-size: 1.17rem;
+      min-width: 1px;
+      max-width: 320px;
+      box-sizing: border-box;
     }
-
-    .end-button {
-      margin-top: 20px;
-      background: none;
-      border: none;
+    .input-area button {
+      min-width: 44px;
+      width: 44px;
+      height: 44px;
       padding: 0;
-      cursor: pointer;
+      border-radius: 100%;
     }
 
-    .btn-gradient-violet-wide {
-    width: 100%;
-    max-width: none;
-    background: linear-gradient(90deg, #8b5cf6 0%, #a21caf 100%);
-    color: #fff;
-    font-weight: bold;
-    border: none;
-    padding: 20px 0;
-    font-size: 1.5rem;
-    border-radius: 20px;
-    box-shadow: 0 4px 24px 0 rgba(168, 85, 247, 0.2);
-    cursor: pointer;
-    text-align: center;
-    margin-top: 30px;
-    margin-bottom: 30px;
-    transition: 
-        transform 0.07s,
-        box-shadow 0.2s;
-    display: block;
-  }
-
- .s3-container {
-  background: url('images/s3-container.png') center center/cover no-repeat;
-  width: 768px;
-  height: 1334px;
-  border-radius: 32px;
-  color: #23212b;
-  text-align: center;
-  box-shadow: 0 4px 32px 0 rgba(62, 66, 130, 0.1);
-  position: relative;
-  margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start; /* or center, as needed */
-  align-items: center;
-  overflow: hidden;   /* Ensures children don't overflow rounded edges */
-}
-
-@media (max-width: 768px) {
-  .s3-container {
-    width: 98vw;
-    height: calc(98vw * 1334 / 768); /* Maintain aspect ratio on smaller screens */
-    max-width: 100vw;
-    max-height: 98vh;
-    border-radius: 7vw;
-  }
-}
-
-  .btn-gradient-violet-wide:active {
-    transform: scale(0.98);
-    box-shadow: 0 2px 12px 0 rgba(168, 85, 247, 0.34);
-  }
-    .end-button img {
-      width: 100%;
-      max-width: 240px;
-    }
-    .email-box{
-      max-width: 80%;
-      width: 100%;
-      margin: auto;
-    }
-
-    @media (max-width: 480px) {
-      .container {
-        padding: 20px 16px;
+    @media (max-width: 820px) {
+      .s3-container {
+        width: 98vw;
+        height: calc(98vw * 1334 / 768);
+        padding: 5vw 2vw;
+        border-radius: 6vw;
       }
-
-      .shark-text {
-        width: 160px;
+      .ai-heading {
+        font-size: 2.7rem;
       }
-
-      .logo {
-        width: 120px;
+      .video-frame {
+        max-width: 95vw;
+        min-height: 22vw;
+        border-radius: 12px;
       }
-
-      .end-button img {
-        max-width: 200px;
+      .input-area input {
+        font-size: 1rem;
       }
     }
-
-    @media (max-width: 480px) {
-      #emailModal > div {
-        padding: 1.5rem !important;
-        max-width: 98vw;
-        border-radius: 1.2rem !important;
-        min-height: 340px;
-        font-size: 90%;
+    @media (max-width: 500px) {
+      .s3-container {
+        width: 99vw;
+        height: auto;
+        min-height: unset;
+        padding: 6vw 2vw;
+        border-radius: 5vw;
       }
-      #emailModal input[type="email"] {
-        height: 44px !important;
-        font-size: 15px !important;
+      .ai-heading {
+        font-size: 2.25rem;
+      }
+      .timer, .name, .role {
+        font-size: 1rem;
       }
     }
   </style>
 </head>
+
 <body>
   <div class="s3-container">
-    <div class="shark-tank-header">
-      <img class="shark-text" src="images/shark-tank-text.png" alt="Shark Tank Text" />
+    <div class="ai-heading">
+      AI Wedding<br>Concierge
     </div>
-    <div class="timer">TIME LEFT <span class="time-box">05:00</span></div>
-    <div class="video-frame aspect-[16/9] w-full bg-black rounded-2xl overflow-hidden relative">
-  <img 
-    id="videoPlaceholder"
-    src="images/lexi-avatar-placeholder1.png"
-    alt="AI Avatar Placeholder"
-    class="absolute inset-0 w-full h-full object-cover object-center z-10 transition-opacity duration-300"
-  />
-  <video
-    id="mediaElement"
-    autoplay
-    playsinline
-    class="absolute inset-0 w-full h-full object-cover object-center z-20"
-  ></video>
-</div>
+    <div class="timer">
+      TIME LEFT <span class="time-box">05:00</span>
+    </div>
+    <div class="video-frame">
+      <img
+        id="videoPlaceholder"
+        src="images/lexi-avatar-placeholder1.png"
+        alt="AI Avatar Placeholder"
+        style="z-index: 10;"
+      />
+      <video
+        id="mediaElement"
+        autoplay
+        playsinline
+        style="z-index: 20;"
+      ></video>
+    </div>
     <div class="name">Amara</div>
     <div class="role">PLAI's Wedding Agent</div>
-
     <div class="controls">
-      <div style="padding: 0 18px;">
       <button id="startBtn" class="btn-gradient-violet-wide">Start Session</button>
-    </div>
       <button id="micBtn" class="btn-secondary" style="display: none;">🎤 Hold Space to Talk</button>
     </div>
-
-    <div class="input-area flex gap-2 mt-3">
-  <input
-    id="taskInput"
-    type="text"
-    placeholder="Type something..."
-    class="flex-1 px-4 py-2 rounded-lg border border-gray-700 bg-[#1a1a2e] text-white focus:outline-none focus:ring-2 focus:ring-purple-400"
-  />
-  <button
-    id="talkBtn"
-    type="button"
-    aria-label="Send Message"
-    class="bg-gradient-to-r from-purple-600 to-blue-500 hover:from-purple-800 hover:to-blue-600 transition-colors 
-      rounded-full w-11 h-11 flex items-center justify-center shadow-lg focus:outline-none focus:ring-2 focus:ring-purple-400"
-  >
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="white" stroke-width="2.5" class="w-6 h-6" viewBox="0 0 24 24">
-      <path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M13 6l6 6-6 6"/>
-    </svg>
-  </button>
-</div>
-</div>
+    <div class="input-area">
+      <input
+        id="taskInput"
+        type="text"
+        placeholder="Type something..."
+      />
+      <button
+        id="talkBtn"
+        type="button"
+        aria-label="Send Message"
+        class="bg-gradient-to-r from-purple-600 to-blue-500 hover:from-purple-800 hover:to-blue-600 rounded-full flex items-center justify-center shadow-lg focus:outline-none focus:ring-2 focus:ring-purple-400"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="white" stroke-width="2.5" class="w-6 h-6" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M13 6l6 6-6 6"/>
+        </svg>
+      </button>
+    </div>
+  </div>
 
   <button class="end-button" style="display: none;">
     <img src="images/end-session-btn.png" alt="End Session Button" />
