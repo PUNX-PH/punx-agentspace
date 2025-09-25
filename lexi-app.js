@@ -155,6 +155,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // On LiveKit track subscription, ensure tracks go to a single MediaStream,
     // and set srcObject immediately when at least one track is present
     room.on(LivekitClient.RoomEvent.TrackSubscribed, (track) => {
+       console.log('TrackSubscribed:', {kind: track.kind, track, participant});
       if (track.kind === "video" || track.kind === "audio") {
         if (!mediaStream) {
           mediaStream = new MediaStream();
@@ -178,6 +179,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Remove tracks on unsubscribe
     room.on(LivekitClient.RoomEvent.TrackUnsubscribed, (track) => {
+      console.log('TrackUnsubscribed:', {kind: track.kind, track, participant});
       if (mediaStream && track.mediaStreamTrack) {
         mediaStream.removeTrack(track.mediaStreamTrack);
         // Optionally: Pause if no tracks left
