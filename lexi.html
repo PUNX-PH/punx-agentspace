@@ -183,26 +183,20 @@
     display: block;
   }
 
-.main-rounded-container {
-  /* Large card matching screenshot look */
-  max-width: 440px;  /* or as needed */
-  margin: 30px auto;
+  .s3-container {
+  background: url('images/s3-container.png') center center/cover no-repeat;
   border-radius: 32px;
-  background: linear-gradient(135deg, #fcfcfc 70%, #f6e8d6 100%);
-  box-shadow: 0 6px 34px 0 rgba(69, 69, 81, 0.19);
-  padding: 30px 0 32px 0;
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-}
-.s3-container {
-  background: transparent !important;
-  box-shadow: none !important;
-  border-radius: 0 !important;
-  padding: 0;
-  max-width: none;
+  padding: 24px 20px;
   width: 100%;
-}
+  max-width: 700px;
+  color: #23212b;
+  text-align: center;
+  box-shadow: 0 4px 32px 0 rgba(62, 66, 130, 0.1);
+  position: relative;
+  /* Add fallback background */
+  background-color: rgba(244, 244, 249, 0.78);
+  }
+
   @media (max-width: 480px) {
     .s3-container {
       padding: 20px 12px;
@@ -259,7 +253,6 @@
   </style>
 </head>
 <body>
-    <div class="main-rounded-container"></div>
   <div class="s3-container">
     <div class="shark-tank-header">
       <img class="shark-text" src="images/shark-tank-text.png" alt="Shark Tank Text" />
@@ -307,7 +300,6 @@
       <path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M13 6l6 6-6 6"/>
     </svg>
   </button>
-</div>
 </div>
 </div>
 
