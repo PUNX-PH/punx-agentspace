@@ -133,7 +133,7 @@ document.addEventListener("DOMContentLoaded", () => {
         Authorization: `Bearer ${sessionToken}`,
       },
       body: JSON.stringify({
-        quality: "high",
+        quality: "low",
         avatar_name: "Marianne_Chair_Sitting_public",
         version: "v2",
         video_encoding: "H264",
