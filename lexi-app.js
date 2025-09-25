@@ -75,7 +75,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
     const data = await response.json();
     console.log("token: "+ data.data.token);
-  
     sessionToken = data.data.token;
   }
 
@@ -106,21 +105,17 @@ document.addEventListener("DOMContentLoaded", () => {
   let avatarBuffer = [];
   let avatarSpeaking = false;
 
-  // Load the knowledge base from file (async)
   async function loadKnowledgeBase() {
-    // Use .txt or .json depending on your file
     const response = await fetch('/lexi.txt'); 
-    // If it's text:
     heygenKnowledge = await response.text();
-    // If it's json, do:   heygenKnowledge = await response.json();
   }
-
 
   async function createNewSession() {
     if (!sessionToken) await getSessionToken();
 
     loadingOverlay.style.display = "flex";
     await loadKnowledgeBase();
+
     const response = await fetch(`${API_CONFIG.serverUrl}/v1/streaming.new`, {
       method: "POST",
       headers: {
@@ -138,14 +133,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const data = await response.json();
 
-     // Defensive coding - check HTTP status and returned data
-  if (!response.ok || !data.data) {
-    loadingOverlay.style.display = "none";
-    // Log error output for debugging
-    console.error("Failed to create HeyGen session.", data);
-    alert("Session start failed: " + (data.error || data.message || JSON.stringify(data)));
-    return;
-  }
+    if (!response.ok || !data.data) {
+      loadingOverlay.style.display = "none";
+      console.error("Failed to create HeyGen session.", data);
+      alert("Session start failed: " + (data.error || data.message || JSON.stringify(data)));
+      return;
+    }
   
     sessionInfo = data.data;
 
@@ -157,6 +150,49 @@ document.addEventListener("DOMContentLoaded", () => {
       },
     });
 
+    // ========= FIXED TRACK HANDLING FOR VIDEO PLAY ==========
+
+    // On LiveKit track subscription, ensure tracks go to a single MediaStream,
+    // and set srcObject immediately when at least one track is present
+    room.on(LivekitClient.RoomEvent.TrackSubscribed, (track) => {
+      if (track.kind === "video" || track.kind === "audio") {
+        if (!mediaStream) {
+          mediaStream = new MediaStream();
+        }
+        mediaStream.addTrack(track.mediaStreamTrack);
+
+        // Set srcObject when at least one track is added
+        if (mediaElement && (!mediaElement.srcObject || mediaElement.srcObject !== mediaStream)) {
+          mediaElement.srcObject = mediaStream;
+          // Force video playback for browsers; log errors if any
+          mediaElement
+            .play()
+            .catch((err) => console.warn("Video autoplay/play error:", err));
+        }
+        // DEBUG: show which tracks you have after each add
+        const audios = mediaStream.getAudioTracks().length;
+        const videos = mediaStream.getVideoTracks().length;
+        console.log(`Tracks in stream: video ${videos}, audio ${audios}`);
+      }
+    });
+
+    // Remove tracks on unsubscribe
+    room.on(LivekitClient.RoomEvent.TrackUnsubscribed, (track) => {
+      if (mediaStream && track.mediaStreamTrack) {
+        mediaStream.removeTrack(track.mediaStreamTrack);
+        // Optionally: Pause if no tracks left
+        if (
+          mediaElement &&
+          mediaStream.getVideoTracks().length === 0 &&
+          mediaStream.getAudioTracks().length === 0
+        ) {
+          mediaElement.pause();
+          mediaElement.srcObject = null;
+        }
+      }
+    });
+
+    // Data channel parsing for avatar "talk" transcript
     room.on(LivekitClient.RoomEvent.DataReceived, (payload) => {
       const dataStr = new TextDecoder().decode(payload);
       try {
@@ -181,25 +217,6 @@ document.addEventListener("DOMContentLoaded", () => {
       } catch (e) {}
     });
 
-    room.on(LivekitClient.RoomEvent.TrackSubscribed, (track) => {
-      if (track.kind === "video" || track.kind === "audio") {
-        mediaStream.addTrack(track.mediaStreamTrack);
-        if (
-          mediaElement &&
-          mediaStream.getVideoTracks().length > 0 &&
-          mediaStream.getAudioTracks().length > 0
-        ) {
-          mediaElement.srcObject = mediaStream;
-        }
-      }
-    });
-
-    room.on(LivekitClient.RoomEvent.TrackUnsubscribed, (track) => {
-      const mediaTrack = track.mediaStreamTrack;
-      if (mediaTrack) mediaStream.removeTrack(mediaTrack);
-    });
-
-    mediaStream = new MediaStream();
     await room.prepareConnection(sessionInfo.url, sessionInfo.access_token);
     await connectWebSocket(sessionInfo.session_id);
   }
@@ -256,12 +273,11 @@ document.addEventListener("DOMContentLoaded", () => {
         taskInput.value = "";
       }
     });
-if (endSessionBtn) {
-  endSessionBtn.addEventListener("click", () => {
-    closeSession();
-  });
-}
-
+  if (endSessionBtn) {
+    endSessionBtn.addEventListener("click", () => {
+      closeSession();
+    });
+  }
 
   async function sendText(text, taskType = "talk") {
     if (!sessionInfo) return;
@@ -280,47 +296,45 @@ if (endSessionBtn) {
     });
   }
 
-    function showEmailModal() {
+  function showEmailModal() {
     document.getElementById("emailModal").style.display = "flex";
+  }
+
+  document.getElementById("emailForm").addEventListener("submit", async function (e) {
+    e.preventDefault();
+    const email = document.getElementById("pitchEmail").value.trim();
+
+    if (!email || !transcriptLog.length) {
+      alert("Missing email or transcript!");
+      return;
     }
 
-document.getElementById("emailForm").addEventListener("submit", async function (e) {
-  e.preventDefault();
-  const email = document.getElementById("pitchEmail").value.trim();
+    try {
+      const data = { email: email , status: "Pending", transcript: transcriptLog };
+      const firebaseUrl = "https://punx-shark-tank-default-rtdb.firebaseio.com/transcripts.json";
+      const response = await fetch(firebaseUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+      });
 
-  if (!email || !transcriptLog.length) {
-    alert("Missing email or transcript!");
-    return;
-  }
+      if (!response.ok) throw new Error("Failed to send data to Firebase");
 
-  try {
-    const data = { email: email , status: "Pending", transcript: transcriptLog };
-    const firebaseUrl = "https://punx-shark-tank-default-rtdb.firebaseio.com/transcripts.json";
-    const response = await fetch(firebaseUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data)
-    });
+      document.getElementById("emailModal").style.display = "none";
+      document.getElementById("sentPromptModal").style.display = "flex";
+    } catch (err) {
+      alert("There was a problem saving your transcript: " + err.message);
+    }
+  });
 
-    if (!response.ok) throw new Error("Failed to send data to Firebase");
+  document.getElementById("sentPromptOkBtn").addEventListener("click", function () {
+    document.getElementById("sentPromptModal").style.display = "none";
+    window.location.href = "https://punx-agentspace.vercel.app/lexi.html";
+  });
 
-    // Hide the email modal
-    document.getElementById("emailModal").style.display = "none";
-    // Show the processing/prompt modal
-    document.getElementById("sentPromptModal").style.display = "flex";
-  } catch (err) {
-    alert("There was a problem saving your transcript: " + err.message);
-  }
-});
-
-document.getElementById("sentPromptOkBtn").addEventListener("click", function () {
-  document.getElementById("sentPromptModal").style.display = "none";
-  window.location.href = "https://punx-agentspace.vercel.app/lexi.html"; // CHANGE this to your real homepage!
-});
-
-document.getElementById("goHomeBtn").addEventListener("click", function () {
-  window.location.href = "https://punx-agentspace.vercel.app/lexi.html"; 
-});
+  document.getElementById("goHomeBtn").addEventListener("click", function () {
+    window.location.href = "https://punx-agentspace.vercel.app/lexi.html"; 
+  });
 
   async function closeSession() {
     if (!sessionInfo) return;
@@ -336,7 +350,10 @@ document.getElementById("goHomeBtn").addEventListener("click", function () {
 
     if (webSocket) webSocket.close();
     if (room) room.disconnect();
-    if (mediaElement) mediaElement.srcObject = null;
+    if (mediaElement && mediaElement.srcObject) {
+      mediaElement.pause();
+      mediaElement.srcObject = null;
+    }
 
     sessionInfo = null;
     room = null;
@@ -354,10 +371,10 @@ document.getElementById("goHomeBtn").addEventListener("click", function () {
     if (timerDisplay) timerDisplay.textContent = "10:00";
 
     // HIDE the placeholder image when video is ready (optional fade)
-  const videoPlaceholder = document.getElementById("videoPlaceholder");
-  if (videoPlaceholder) videoPlaceholder.style.opacity = '0'; // fades out
+    const videoPlaceholder = document.getElementById("videoPlaceholder");
+    if (videoPlaceholder) videoPlaceholder.style.opacity = '0';
 
-  loadingOverlay.style.display = "none";
+    loadingOverlay.style.display = "none";
 
     showEmailModal();
   }
@@ -376,16 +393,13 @@ document.getElementById("goHomeBtn").addEventListener("click", function () {
     recognition.onstart = () => {
       recognizing = true;
     };
-
     recognition.onerror = (event) => {
       recognizing = false;
       console.error(`Speech recognition error: ${event.error}`);
     };
-
     recognition.onend = () => {
       recognizing = false;
     };
-
     recognition.onresult = (event) => {
       const transcript = event.results[0][0].transcript.trim();
       if (transcript) {
@@ -406,7 +420,6 @@ document.getElementById("goHomeBtn").addEventListener("click", function () {
       recognition.start();
     }
   });
-
   document.addEventListener("keyup", (event) => {
     if (event.code === "Space" && recognition && recognizing && mode === "voice") {
       event.preventDefault();
