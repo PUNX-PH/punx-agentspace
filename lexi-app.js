@@ -181,32 +181,18 @@ document.addEventListener("DOMContentLoaded", () => {
       } catch (e) {}
     });
 
-   room.on(LivekitClient.RoomEvent.TrackSubscribed, (track, publication, participant) => {
-  const mediaTrack = track.mediaStreamTrack;
-
-  if (track.kind === "video") {
-    console.log("Video track subscribed");
-    const videoStream = new MediaStream([mediaTrack]);
-    mediaElement.srcObject = videoStream;
-    mediaElement.play().catch(err => console.warn("Video play blocked:", err));
-  }
-
-  if (track.kind === "audio") {
-    console.log("Audio track subscribed");
-    const audioStream = new MediaStream([mediaTrack]);
-    // Merge audio with existing video if already set
-    if (mediaElement.srcObject) {
-      const combined = new MediaStream([
-        ...mediaElement.srcObject.getTracks(),
-        mediaTrack
-      ]);
-      mediaElement.srcObject = combined;
-    } else {
-      mediaElement.srcObject = audioStream;
-    }
-  }
-});
-
+    room.on(LivekitClient.RoomEvent.TrackSubscribed, (track) => {
+      if (track.kind === "video" || track.kind === "audio") {
+        mediaStream.addTrack(track.mediaStreamTrack);
+        if (
+          mediaElement &&
+          mediaStream.getVideoTracks().length > 0 &&
+          mediaStream.getAudioTracks().length > 0
+        ) {
+          mediaElement.srcObject = mediaStream;
+        }
+      }
+    });
 
     room.on(LivekitClient.RoomEvent.TrackUnsubscribed, (track) => {
       const mediaTrack = track.mediaStreamTrack;
