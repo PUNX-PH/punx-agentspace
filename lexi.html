@@ -183,6 +183,28 @@
     display: block;
   }
 
+  .s3-container {
+  background: url('images/s3-container.png') center center/cover no-repeat;
+  border-radius: 32px;
+  padding: 24px 20px;
+  width: 100%;
+  max-width: 400px;
+  color: #23212b;
+  text-align: center;
+  box-shadow: 0 4px 32px 0 rgba(62, 66, 130, 0.1);
+  position: relative;
+  /* Add fallback background */
+  background-color: rgba(244, 244, 249, 0.78);
+  }
+
+  @media (max-width: 480px) {
+    .s3-container {
+      padding: 20px 12px;
+      max-width: 98vw;
+      border-radius: 1.1rem;
+    }
+  }
+
   .btn-gradient-violet-wide:active {
     transform: scale(0.98);
     box-shadow: 0 2px 12px 0 rgba(168, 85, 247, 0.34);
@@ -231,7 +253,7 @@
   </style>
 </head>
 <body>
-  <div class="container">
+  <div class="s3-container">
     <div class="shark-tank-header">
       <img class="shark-text" src="images/shark-tank-text.png" alt="Shark Tank Text" />
     </div>
