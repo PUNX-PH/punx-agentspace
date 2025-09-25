@@ -183,27 +183,32 @@
     display: block;
   }
 
-  .s3-container {
+ .s3-container {
   background: url('images/s3-container.png') center center/cover no-repeat;
+  width: 768px;
+  height: 1334px;
   border-radius: 32px;
-  padding: 24px 20px;
-  width: 100%;
-  max-width: 800px;
   color: #23212b;
   text-align: center;
   box-shadow: 0 4px 32px 0 rgba(62, 66, 130, 0.1);
   position: relative;
-  /* Add fallback background */
-  background-color: rgba(244, 244, 249, 0.78);
-  }
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start; /* or center, as needed */
+  align-items: center;
+  overflow: hidden;   /* Ensures children don't overflow rounded edges */
+}
 
-  @media (max-width: 480px) {
-    .s3-container {
-      padding: 20px 12px;
-      max-width: 98vw;
-      border-radius: 1.1rem;
-    }
+@media (max-width: 768px) {
+  .s3-container {
+    width: 98vw;
+    height: calc(98vw * 1334 / 768); /* Maintain aspect ratio on smaller screens */
+    max-width: 100vw;
+    max-height: 98vh;
+    border-radius: 7vw;
   }
+}
 
   .btn-gradient-violet-wide:active {
     transform: scale(0.98);
