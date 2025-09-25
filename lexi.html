@@ -162,18 +162,24 @@
       cursor: pointer;
     }
 
- .btn-gradient-violet-wide {
+.btn-gradient-violet-wide {
   width: 100%;
   max-width: none;
-  /* Gold gradient from true gold -> pale gold */
-  background: linear-gradient(90deg, #FFD700 0%, #FFED85 100%);
+  background: linear-gradient(
+    90deg, 
+    #fff8dc 0%,      /* light highlight */
+    #f8d568 15%,     /* pale gold */
+    #ffd700 35%,     /* true gold */
+    #b88900 60%,     /* deep gold/brown */
+    #ffd700 80%,     /* true gold */
+    #fff8dc 100%     /* light highlight */
+  );
   color: #fff;
   font-weight: bold;
   border: none;
   padding: 20px 0;
   font-size: 1.5rem;
   border-radius: 20px;
-  /* Gold shadow, subtle and elegant */
   box-shadow: 0 4px 24px 0 rgba(255, 215, 0, 0.2);
   cursor: pointer;
   text-align: center;
@@ -183,6 +189,8 @@
       transform 0.07s,
       box-shadow 0.2s;
   display: block;
+  /* Optional: add a golden border for better effect */
+  border: 2px solid #b88900;
 }
 
   .s3-container {
